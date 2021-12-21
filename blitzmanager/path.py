@@ -4,6 +4,7 @@
 import os
 import shutil
 import zipfile
+from typing import Callable
 
 from .logger import logger
 
@@ -110,7 +111,7 @@ class Path(object):
             else:
                 logger.error(exception)
         else:
-            logger.info("The path \"{}\" has been removed.".format(self.path),verbose=10)
+            logger.info("The path \"{}\" has been removed.".format(self.path), verbose=10)
             return True
         return False
 
@@ -138,7 +139,7 @@ class Path(object):
             else:
                 open(self.path, "w+").close()
 
-            logger.info("The path \"{}\" has been created".format(self.path),verbose=10)
+            logger.info("The path \"{}\" has been created".format(self.path), verbose=10)
 
         return True
 
@@ -166,7 +167,7 @@ class Path(object):
         assert isinstance(destination, Path)
 
         if not self.exists():
-            logger.error(f"This path {self.path} does not exist and cannot be copied to {destination}",verbose=0)
+            logger.error(f"This path {self.path} does not exist and cannot be copied to {destination}", verbose=0)
             return False
 
         if not self.is_dir():
@@ -207,9 +208,9 @@ class Path(object):
                 zip_ref.extractall(output_dir.path)
             return True
         except Exception as e:
-            logger.critical(f"Failed to extract {self.path} to {output_dir}. Error : {e}",verbose=0)
+            logger.critical(f"Failed to extract {self.path} to {output_dir}. Error : {e}", verbose=0)
 
-    def walk(self, callback, recursive=True) -> bool:
+    def walk(self, callback: Callable[[str, list, list], None], recursive=True) -> bool:
         """
 
         :param recursive:
