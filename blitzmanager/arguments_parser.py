@@ -3,11 +3,6 @@
 
 import argparse
 
-from .managers import ManagerInitializer
-from .logger import logger
-
-import sys
-
 
 class ArgumentsParser(object):
 
@@ -53,26 +48,6 @@ class ArgumentsParser(object):
                                                 conflict_handler=conflict_handler,
                                                 add_help=add_help,
                                                 allow_abbrev=allow_abbrev)
-        self.__add_default_flags()
-
-    def __add_default_flags(self):
-        """
-
-        :return:
-        """
-        self.add_flag("--verbose", default=5, help="Logging verbosity", required=False, type=int)
-        self.add_flag("--list_managers", default=False,
-                      help="List of supported C/C++ package managers.",
-                      action="store_true")
-
-    def __list_mangers(self):
-        """
-
-        :return:
-        """
-        for i, m in enumerate(ManagerInitializer.supported_managers()):
-            logger.info(f"Manager [{i}] : {m}")
-        sys.exit(0)
 
     def add_flag(self, flag_name: str, *args, **kwargs):
         """
@@ -82,7 +57,10 @@ class ArgumentsParser(object):
         :param kwargs:
         :return:
         """
+        if flag_name.replace("-", "") in self.flags:
+            raise RuntimeError(f"Flag {flag_name} already exist")
         self.flags.append(flag_name.replace("-", ""))
+
         self.__parser.add_argument(flag_name, *args, **kwargs)
 
     def parse(self, args=None, namespace=None):
@@ -92,10 +70,8 @@ class ArgumentsParser(object):
         :param namespace:
         :return:
         """
-        ret = self.__parser.parse_args(args=args, namespace=namespace)
-        if ret.list_managers:
-            self.__list_mangers()
-        return ret
+
+        return self.__parser.parse_args(args=args, namespace=namespace)
 
 
 __all__ = ["ArgumentsParser"]

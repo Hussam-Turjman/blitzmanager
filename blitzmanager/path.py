@@ -115,7 +115,7 @@ class Path(object):
         """
         exist = self.exist()
         if exist and not override:
-            msg = "The path \"{}\" already exist and therefore will not be created.".format(self.path)
+            msg = "The path \"{}\" already exist and will not be created.".format(self.path)
             if ignore_errors:
                 logger.warning(msg)
             else:
@@ -199,7 +199,7 @@ class Path(object):
                 zip_ref.extractall(output_dir.path)
             return True
         except Exception as e:
-            logger.error(f"Failed to extract {self.path} to {output_dir}. Error : {e}")
+            logger.critical(f"Failed to extract {self.path} to {output_dir}. Error : {e}")
 
     def __str__(self):
         """

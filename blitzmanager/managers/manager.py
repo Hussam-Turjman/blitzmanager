@@ -3,9 +3,18 @@
 
 import abc
 from ..path import Path
+from .supported_managers import SupportedManagers
 
 
 class PackageManager(abc.ABC):
+
+    @staticmethod
+    @abc.abstractmethod
+    def type() -> SupportedManagers:
+        """
+
+        :return:
+        """
 
     @staticmethod
     @abc.abstractmethod
@@ -40,7 +49,6 @@ class PackageManager(abc.ABC):
         :param kwargs:
         :return:
         """
-
 
     @abc.abstractmethod
     def install(self, dependency: str, output_path: Path, *args, **kwargs):

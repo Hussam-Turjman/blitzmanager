@@ -4,6 +4,8 @@ from .runner import Runner
 from .path import Path
 from .flag_observer import FlagObserver
 from .cmake import CMakeArguments, CMakeBuilder
+from .managers import SupportedManagers
+from .main_manager import BlitzManager
 
 __all__ = ["logger",
            "CMakeBuilder",
@@ -11,4 +13,6 @@ __all__ = ["logger",
            "FlagObserver",
            "ArgumentsParser",
            "Runner",
-           "Path"]
+           "Path",
+           "SupportedManagers",
+           "BlitzManager"]

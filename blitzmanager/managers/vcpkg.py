@@ -7,10 +7,19 @@ from ..path import Path
 from ..command import Command
 from ..platform import PLATFORM
 from ..logger import logger
+from .supported_managers import SupportedManagers
 
 
 class VcpkgManager(PackageManager):
     vcpkg_path: Path
+
+    @staticmethod
+    def type() -> SupportedManagers:
+        """
+
+        :return:
+        """
+        return SupportedManagers.VCPKG
 
     @staticmethod
     def name() -> str:
@@ -33,6 +42,8 @@ class VcpkgManager(PackageManager):
         # x64-windows
         # x86-windows
         self.vcpkg_path = Path("")
+        self.__toolchain_path = Path("")
+
         if PLATFORM.is_windows():
             self.target = "x64-windows-static"
         elif PLATFORM.is_linux():
@@ -81,6 +92,7 @@ class VcpkgManager(PackageManager):
 
         :return:
         """
+        return self.__toolchain_path
 
     def source_path(self) -> Path:
         """
@@ -104,7 +116,10 @@ class VcpkgManager(PackageManager):
         path = Path(self.input_path.path, f"vcpkg-{self.version()}")
         assert path.exist()
         vcpkg_bin = Path(path.path, "vcpkg")
-
+        self.__toolchain_path = Path(path.path,
+                                     "scripts",
+                                     "buildsystems",
+                                     "vcpkg.cmake")
         self.vcpkg_path = vcpkg_bin.copy()
         if vcpkg_bin.exist():
             logger.info(f"vcpkg is already built and located here : {vcpkg_bin.path}")

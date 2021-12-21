@@ -11,9 +11,10 @@ class DependencyBuilder(object):
         self.output_dir = output_dir
         assert output_dir.is_dir()
 
-    def build_from_source(self, dependency: str, input_dir: Path, cmake_args: CMakeArguments):
+    def build_from_source(self, dependency: str, input_dir: Path, cmake_args: CMakeArguments, delete_cache=False):
         """
 
+        :param delete_cache:
         :param dependency:
         :param input_dir:
         :param cmake_args:
@@ -21,6 +22,8 @@ class DependencyBuilder(object):
         """
         output_path = Path(self.output_dir.path, f"{dependency}_build")
         output_path.make(directory=True, ignore_errors=True)
+        if delete_cache:
+            Path(output_path.path, "CMakeCache.txt").remove(ignore_errors=True)
         builder = CMakeBuilder(cmake_args, input_dir, output_path)
         builder.configure().build("--config", "Release").install("--config", "Release")
         return self

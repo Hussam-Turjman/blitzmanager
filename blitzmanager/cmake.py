@@ -7,12 +7,15 @@ from .logger import logger
 
 
 class CMakeArguments(object):
-    def __init__(self, install_path: Path, *extra_args, generator=None, build_type="Release", prefix_path=None):
+    def __init__(self, install_path: Path, *extra_args, generator=None,
+                 build_type="Release",
+                 prefix_path=None, toolchain_path=None):
         self.__install_path = install_path
-        self.__prefix_path = Path(install_path.path) if prefix_path is None else prefix_path
+        self.__prefix_path = install_path.copy() if prefix_path is None else prefix_path
         self.__generator = generator
         self.__extra_args = extra_args
         self.__build_type = build_type
+        self.__toolchain_path = toolchain_path
 
     @property
     def args(self):
@@ -22,7 +25,8 @@ class CMakeArguments(object):
 
         if self.__generator is not None:
             res.append("-G{}".format(self.__generator))
-
+        if self.__toolchain_path is not None:
+            res.append(f"-DCMAKE_TOOLCHAIN_FILE={self.__toolchain_path.path}")
         res += [str(a) for a in self.__extra_args]
         return [str(a) for a in res]
 
@@ -36,6 +40,12 @@ class CMakeArguments(object):
 
 class CMakeBuilder(object):
     def __init__(self, cmake_args: CMakeArguments, input_path: Path, output_path: Path):
+        """
+
+        :param cmake_args:
+        :param input_path:
+        :param output_path:
+        """
         self.__cmake_args = cmake_args.args
         self.__input_path = input_path
         self.__output_path = output_path
