@@ -4,7 +4,7 @@
 import os
 
 from .cmake_creator import CMakeCreator
-from .DirectoryParser import DirectoryParserCallback, DirectoryParser, DirectoryParserFilter
+from .directory_parser import DirectoryParserCallback, DirectoryParser, DirectoryParserFilter
 from ..text_file import TextFile
 from ..path import Path
 

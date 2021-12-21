@@ -1,10 +1,10 @@
 # Copyright (c) 2021-2022 The BlitzManager project Authors. All rights reserved. Use of this
 # source code is governed by a BSD-style license that can be found in the LICENSE file.
 
-from .headersReplacer import HeadersCleaner, HeadersReplacer
-from .directoryParser import DirectoryParserCallback, DirectoryParser, DirectoryParserFilter
-from ..Path import Path
-from ..Logger import logger
+from .headers_replacer import HeadersCleaner, HeadersReplacer
+from .directory_parser import DirectoryParserCallback, DirectoryParser, DirectoryParserFilter
+from ..path import Path
+from ..logger import logger
 
 import os
 import re
