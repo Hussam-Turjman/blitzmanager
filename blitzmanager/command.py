@@ -48,21 +48,21 @@ class Command(object):
         :param check: fail if the program returned a status code other than zero
         :return:
         """
-        logger.dashed_line()
+        logger.dashed_line(verbose=10)
 
         args = " ".join(self.args)
         msg = "Executing : {} {}".format(self.program, args)
 
-        logger.info(msg)
-        logger.info("Working directory : {}".format(cwd))
+        logger.info(msg,verbose=10)
+        logger.info("Working directory : {}".format(cwd),verbose=10)
 
-        logger.dashed_line()
+        logger.dashed_line(verbose=10)
 
         args = [self.program]
         args += self.args
 
         subprocess.run(args, cwd=cwd, check=check)
-        logger.info(os.linesep)
+        logger.info(os.linesep,verbose=10)
 
         return self
 

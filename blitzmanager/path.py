@@ -3,9 +3,9 @@
 
 import os
 import shutil
+import zipfile
 
 from .logger import logger
-import zipfile
 
 
 class Path(object):
@@ -47,12 +47,20 @@ class Path(object):
     def path(self):
         return self.__path
 
-    def is_abs(self):
-        if self.exist():
+    def is_abs(self, check_if_exists=True):
+        """
+
+        :param check_if_exists:
+        :return:
+        """
+        if check_if_exists:
+            if self.exists():
+                return os.path.isabs(self.__path)
+        else:
             return os.path.isabs(self.__path)
         return False
 
-    def exist(self):
+    def exists(self):
         """
 
         :return:
@@ -75,7 +83,7 @@ class Path(object):
 
         :return:
         """
-        if self.exist():
+        if self.exists():
             return os.path.isdir(self.path)
         return False
 
@@ -102,7 +110,7 @@ class Path(object):
             else:
                 logger.error(exception)
         else:
-            logger.info("The path \"{}\" has been removed.".format(self.path))
+            logger.info("The path \"{}\" has been removed.".format(self.path),verbose=10)
             return True
         return False
 
@@ -113,11 +121,11 @@ class Path(object):
         :param override : if true remove the old path.
         :return:
         """
-        exist = self.exist()
+        exist = self.exists()
         if exist and not override:
             msg = "The path \"{}\" already exist and will not be created.".format(self.path)
             if ignore_errors:
-                logger.warning(msg)
+                logger.warning(msg, verbose=10)
             else:
                 logger.error(msg)
             return False
@@ -130,7 +138,7 @@ class Path(object):
             else:
                 open(self.path, "w+").close()
 
-            logger.info("The path \"{}\" has been created".format(self.path))
+            logger.info("The path \"{}\" has been created".format(self.path),verbose=10)
 
         return True
 
@@ -147,7 +155,7 @@ class Path(object):
         except Exception as exp:
             logger.error("Failed to copy a file from {} to {}. {}".format(source, des, str(exp)))
 
-        logger.info("Copying {} to {} ".format(source, des), verbose=5)
+        logger.info("Copying {} to {} ".format(source, des), verbose=10)
 
     def copy_to(self, destination):
         """
@@ -157,8 +165,8 @@ class Path(object):
         """
         assert isinstance(destination, Path)
 
-        if not self.exist():
-            logger.error(f"This path {self.path} does not exist and cannot be copied to {destination}")
+        if not self.exists():
+            logger.error(f"This path {self.path} does not exist and cannot be copied to {destination}",verbose=0)
             return False
 
         if not self.is_dir():
@@ -199,7 +207,34 @@ class Path(object):
                 zip_ref.extractall(output_dir.path)
             return True
         except Exception as e:
-            logger.critical(f"Failed to extract {self.path} to {output_dir}. Error : {e}")
+            logger.critical(f"Failed to extract {self.path} to {output_dir}. Error : {e}",verbose=0)
+
+    def walk(self, callback, recursive=True) -> bool:
+        """
+
+        :param recursive:
+        :param callback:
+        :return:
+        """
+        if not self.exists():
+            return False
+        if not self.is_dir():
+            return False
+        if self.is_empty():
+            return False
+        for root, subdirs, files in os.walk(self.__path):
+            callback(root, subdirs, files)
+            if not recursive:
+                break
+        return True
+
+    @classmethod
+    def cwd(cls):
+        """
+
+        :return:
+        """
+        return cls(os.getcwd())
 
     def __str__(self):
         """

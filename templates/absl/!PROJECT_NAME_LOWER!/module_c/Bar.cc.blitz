@@ -1,0 +1,10 @@
+
+#include<iostream>
+#include "!PROJECT_NAME_LOWER!/module_c/Bar.h"
+#include "!PROJECT_NAME_LOWER!/module_c/internal/BarInternal.h"
+
+void bar() {
+    std::cout << " Bar " << std::endl;
+    BarInternal barInternal;
+    barInternal.print();
+}

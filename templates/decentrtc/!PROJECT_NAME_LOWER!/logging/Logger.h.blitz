@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+ * source code is governed by a BSD-style license that can be found in the LICENSE file.
+ */
+
+#ifndef !PROJECT_NAME_CAPITAL!_LOGGER_H
+#define !PROJECT_NAME_CAPITAL!_LOGGER_H
+
+#include "!PROJECT_NAME_LOWER!/!PROJECT_NAME_LOWER!_config.h"
+
+#include <cstdarg>
+#include <stdio.h>
+
+#define PRINT_LOG(level, format, ...)                                                 \
+    do                                                                                \
+    {                                                                                 \
+        logging::log(level, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__); \
+    } while (0)
+
+
+namespace logging
+{
+    enum class !PROJECT_NAME_CAPITAL!_EXPORT Level
+    {
+        ERROR,
+        WARNING,
+        CRITICAL,
+        INFO,
+        DEBUG,
+        PANIC
+    };
+
+    class !PROJECT_NAME_CAPITAL!_HIDDEN Logger final
+    {
+    public:
+        static Logger &getInstance();
+        ~Logger() = default;
+
+        void log(Level level, const char *file, const char *function, int line, const char *format, va_list args);
+
+        !PROJECT_NAME_CAPITAL!_DISALLOW_COPY_AND_ASSIGN(Logger);
+
+    private:
+        Logger();
+        static const char *levelName(Level level);
+
+    };
+
+    void !PROJECT_NAME_CAPITAL!_EXPORT log(Level level, const char *file, const char *function, int line, const char *format, ...);
+
+}
+
+#endif /* !PROJECT_NAME_CAPITAL!_LOGGER_H */

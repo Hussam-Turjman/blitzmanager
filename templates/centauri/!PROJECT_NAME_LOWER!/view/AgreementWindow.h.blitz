@@ -1,0 +1,52 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_VIEW_AGREEMENTWINDOW_H
+#define CAMERA_VIEW_AGREEMENTWINDOW_H
+
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+class QGroupBox;
+
+class QVBoxLayout;
+
+class QPlainTextEdit;
+
+class QDialogButtonBox;
+class QWebEngineView;
+QT_END_NAMESPACE
+
+namespace View {
+    bool acceptTheAgreement(int argc, char *argv[]);
+
+    class AgreementWindow : public QMainWindow {
+    Q_OBJECT
+    public:
+        AgreementWindow();
+
+        ~AgreementWindow() override;
+
+    protected:
+        void closeEvent(QCloseEvent *event) override;
+
+    public:
+        bool acceptedTheAgreement = false;
+
+    private slots:
+
+        void accept();
+
+        void reject();
+
+    private:
+        QGroupBox *groupBox;
+        QVBoxLayout *qvBoxLayout;
+        QDialogButtonBox *buttonBox;
+        QWebEngineView *webEngineView;
+    };
+}
+
+
+#endif //CAMERA_VIEW_AGREEMENTWINDOW_H

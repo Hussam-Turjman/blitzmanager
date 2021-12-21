@@ -1,0 +1,55 @@
+
+cmake_minimum_required(VERSION 3.5)
+project(ImportTest CXX)
+
+set(BIN_DIR ${PROJECT_BINARY_DIR})
+set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+
+if (NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR}/bin)
+endif ()
+
+if (NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_DIR}/lib)
+endif ()
+
+if (NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_DIR}/archive)
+endif ()
+
+
+find_package(!PROJECT_NAME_LOWER! REQUIRED)
+
+
+add_executable(${PROJECT_NAME} main.cc)
+target_link_libraries(${PROJECT_NAME} 
+!PROJECT_NAME_LOWER!::logging
+)
+
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION bin
+        EXPORT ${PROJECT_NAME}Targets)
+
+if ("!PROJECT_NAME_LOWER!_dll" IN_LIST !PROJECT_NAME_CAPITAL!_MODULES)
+    message(STATUS "Found !PROJECT_NAME_LOWER!_dll")
+    add_executable(${PROJECT_NAME}Dll main.cc)
+    target_link_libraries(${PROJECT_NAME}Dll !PROJECT_NAME_LOWER!::!PROJECT_NAME_LOWER!_dll)
+    install(TARGETS ${PROJECT_NAME}Dll
+            DESTINATION bin
+            EXPORT ${PROJECT_NAME}Targets)
+endif()
+
+foreach(MODULE IN LISTS !PROJECT_NAME_CAPITAL!_MODULES)
+    message(STATUS "!PROJECT_NAME_CAPITAL! MODULE = ${MODULE}")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:!PROJECT_NAME_LOWER!::${MODULE}> $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+
+endforeach()
+

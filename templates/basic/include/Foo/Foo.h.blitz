@@ -1,0 +1,6 @@
+!BLITZ_NOTICE!
+
+#include<!PROJECT_NAME!Config.h>
+namespace Foo {
+void !PROJECT_NAME_CAPITAL!_EXPORT bar();
+}

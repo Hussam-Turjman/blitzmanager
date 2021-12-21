@@ -1,0 +1,323 @@
+# Auto generated file by blitz 2021-03-12-15:40:56. Blitz is a tool for generating cmake 
+# templates, written by (Mohammed Hussam Al Turjman, hussam.turjman@gmail.com). 
+# For more information please visit https://github.com/Hussam-Turjman/LibraryTemplate
+
+#
+# Copyright 2017 The Abseil Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+include(CMakeParseArguments)
+include(!PROJECT_NAME!ConfigureCopts)
+include(!PROJECT_NAME!Dll)
+include(!PROJECT_NAME!InstallDirs)
+
+# The IDE folder for !PROJECT_NAME! that will be used if !PROJECT_NAME! is included in a CMake
+# project that sets
+#    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+# For example, Visual Studio supports folders.
+if(NOT DEFINED !PROJECT_NAME_CAPITAL!_IDE_FOLDER)
+  set(!PROJECT_NAME_CAPITAL!_IDE_FOLDER !PROJECT_NAME!)
+endif()
+
+# !PROJECT_NAME_LOWER!_cc_library()
+#
+# CMake function to imitate Bazel's cc_library rule.
+#
+# Parameters:
+# NAME: name of target (see Note)
+# HDRS: List of public header files for the library
+# SRCS: List of source files for the library
+# DEPS: List of other libraries to be linked in to the binary targets
+# COPTS: List of private compile options
+# DEFINES: List of public defines
+# LINKOPTS: List of link options
+# PUBLIC: Add this so that this library will be exported under !PROJECT_NAME_LOWER!::
+# Also in IDE, target will appear in !PROJECT_NAME! folder while non PUBLIC will be in !PROJECT_NAME!/internal.
+# TESTONLY: When added, this target will only be built if user passes -D!PROJECT_NAME_CAPITAL!_RUN_TESTS=ON to CMake.
+#
+# Note:
+# By default, !PROJECT_NAME_LOWER!_cc_library will always create a library named !PROJECT_NAME_LOWER!_${NAME},
+# and alias target !PROJECT_NAME_LOWER!::${NAME}.  The !PROJECT_NAME_LOWER!:: form should always be used.
+# This is to reduce namespace pollution.
+#
+# !PROJECT_NAME_LOWER!_cc_library(
+#   NAME
+#     awesome
+#   HDRS
+#     "a.h"
+#   SRCS
+#     "a.cc"
+# )
+# !PROJECT_NAME_LOWER!_cc_library(
+#   NAME
+#     fantastic_lib
+#   SRCS
+#     "b.cc"
+#   DEPS
+#     !PROJECT_NAME_LOWER!::awesome # not "awesome" !
+#   PUBLIC
+# )
+#
+# !PROJECT_NAME_LOWER!_cc_library(
+#   NAME
+#     main_lib
+#   ...
+#   DEPS
+#     !PROJECT_NAME_LOWER!::fantastic_lib
+# )
+#
+# TODO: Implement "ALWAYSLINK"
+function(!PROJECT_NAME_LOWER!_cc_library)
+  cmake_parse_arguments(!PROJECT_NAME_CAPITAL!_CC_LIB
+    "DISABLE_INSTALL;PUBLIC;TESTONLY"
+    "NAME"
+    "HDRS;SRCS;COPTS;DEFINES;LINKOPTS;DEPS"
+    ${ARGN}
+  )
+  if (0)
+    message(STATUS "---------------------------------------------------")
+    message(STATUS "Creating !PROJECT_NAME_LOWER! library ")
+
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_DISABLE_INSTALL : ${!PROJECT_NAME_CAPITAL!_CC_LIB_DISABLE_INSTALL}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_PUBLIC : ${!PROJECT_NAME_CAPITAL!_CC_LIB_PUBLIC}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_TESTONLY : ${!PROJECT_NAME_CAPITAL!_CC_LIB_TESTONLY}")
+
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_NAME : ${!PROJECT_NAME_CAPITAL!_CC_LIB_NAME}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_HDRS : ${!PROJECT_NAME_CAPITAL!_CC_LIB_HDRS}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_SRCS : ${!PROJECT_NAME_CAPITAL!_CC_LIB_SRCS}")
+
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_COPTS : ${!PROJECT_NAME_CAPITAL!_CC_LIB_COPTS}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_DEFINES : ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEFINES}")
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_LINKOPTS : ${!PROJECT_NAME_CAPITAL!_CC_LIB_LINKOPTS}")
+
+    message(STATUS "!PROJECT_NAME_CAPITAL!_CC_LIB_DEPS : ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEPS}")
+
+  endif ()
+
+  if(!PROJECT_NAME_CAPITAL!_CC_LIB_TESTONLY AND NOT !PROJECT_NAME_CAPITAL!_RUN_TESTS)
+    return()
+  endif()
+
+  if(!PROJECT_NAME_CAPITAL!_ENABLE_INSTALL)
+    set(_NAME "${!PROJECT_NAME_CAPITAL!_CC_LIB_NAME}")
+  else()
+    set(_NAME "!PROJECT_NAME_LOWER!_${!PROJECT_NAME_CAPITAL!_CC_LIB_NAME}")
+  endif()
+
+  # Check if this is a header-only library
+  set(!PROJECT_NAME_CAPITAL!_CC_SRCS "${!PROJECT_NAME_CAPITAL!_CC_LIB_SRCS}")
+  list(FILTER !PROJECT_NAME_CAPITAL!_CC_SRCS EXCLUDE REGEX ".*\.(h|inc)")
+
+
+  if("${!PROJECT_NAME_CAPITAL!_CC_SRCS}" STREQUAL "")
+    set(!PROJECT_NAME_CAPITAL!_CC_LIB_IS_INTERFACE 1)
+  else()
+    set(!PROJECT_NAME_CAPITAL!_CC_LIB_IS_INTERFACE 0)
+  endif()
+
+  if(BUILD_SHARED_LIBS)
+    set(_build_type "shared")
+  else()
+    set(_build_type "static")
+  endif()
+
+  if(NOT !PROJECT_NAME_CAPITAL!_CC_LIB_IS_INTERFACE)
+
+   if(${_build_type} STREQUAL "static" OR ${_build_type} STREQUAL "shared")
+      add_library(${_NAME} "")
+      target_sources(${_NAME} PRIVATE ${!PROJECT_NAME_CAPITAL!_CC_LIB_SRCS} ${!PROJECT_NAME_CAPITAL!_CC_LIB_HDRS})
+      target_link_libraries(${_NAME}
+      PUBLIC ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEPS}
+      PRIVATE
+        ${!PROJECT_NAME_CAPITAL!_CC_LIB_LINKOPTS}
+        ${!PROJECT_NAME_CAPITAL!_DEFAULT_LINKOPTS}
+      )
+      if (${_build_type} STREQUAL "shared")
+          target_compile_definitions(
+                  ${_NAME}
+                  PRIVATE
+                  EXPORTING_!PROJECT_NAME_CAPITAL!
+                  PUBLIC
+                  !PROJECT_NAME_CAPITAL!_BUILD_SHARED_LIBS
+          )
+      endif ()
+
+
+    else()
+      message(FATAL_ERROR "Invalid build type: ${_build_type}")
+    endif()
+
+    # Linker language can be inferred from sources, but in the case of DLLs we
+    # don't have any .cc files so it would be ambiguous. We could set it
+    # explicitly only in the case of DLLs but, because "CXX" is always the
+    # correct linker language for static or for shared libraries, we set it
+    # unconditionally.
+    set_property(TARGET ${_NAME} PROPERTY LINKER_LANGUAGE "CXX")
+
+    target_include_directories(${_NAME}
+      PUBLIC
+        "$<BUILD_INTERFACE:${!PROJECT_NAME_CAPITAL!_COMMON_INCLUDE_DIRS}>"
+        $<INSTALL_INTERFACE:${!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR}>
+    )
+    target_compile_options(${_NAME}
+      PRIVATE ${!PROJECT_NAME_CAPITAL!_CC_LIB_COPTS})
+    target_compile_definitions(${_NAME} PUBLIC ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEFINES})
+
+    # Add all !PROJECT_NAME! targets to a a folder in the IDE for organization.
+    if(!PROJECT_NAME_CAPITAL!_CC_LIB_PUBLIC)
+      set_property(TARGET ${_NAME} PROPERTY FOLDER ${!PROJECT_NAME_CAPITAL!_IDE_FOLDER})
+    elseif(!PROJECT_NAME_CAPITAL!_CC_LIB_TESTONLY)
+      set_property(TARGET ${_NAME} PROPERTY FOLDER ${!PROJECT_NAME_CAPITAL!_IDE_FOLDER}/test)
+    else()
+      set_property(TARGET ${_NAME} PROPERTY FOLDER ${!PROJECT_NAME_CAPITAL!_IDE_FOLDER}/internal)
+    endif()
+
+    # INTERFACE libraries can't have the CXX_STANDARD property set
+    set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD ${!PROJECT_NAME_CAPITAL!_CXX_STANDARD})
+    set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+    # When being installed, we lose the !PROJECT_NAME_LOWER!_ prefix.  We want to put it back
+    # to have properly named lib files.  This is a no-op when we are not being
+    # installed.
+    if(!PROJECT_NAME_CAPITAL!_ENABLE_INSTALL)
+      set_target_properties(${_NAME} PROPERTIES
+        OUTPUT_NAME "!PROJECT_NAME_LOWER!_${_NAME}"
+      )
+    endif()
+  else()
+    # Generating header-only library
+    add_library(${_NAME} INTERFACE)
+    target_include_directories(${_NAME}
+      INTERFACE
+        "$<BUILD_INTERFACE:${!PROJECT_NAME_CAPITAL!_COMMON_INCLUDE_DIRS}>"
+        $<INSTALL_INTERFACE:${!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR}>
+      )
+
+    target_link_libraries(${_NAME}
+      INTERFACE
+        ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEPS}
+        ${!PROJECT_NAME_CAPITAL!_CC_LIB_LINKOPTS}
+        ${!PROJECT_NAME_CAPITAL!_DEFAULT_LINKOPTS}
+    )
+    target_compile_definitions(${_NAME} INTERFACE ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEFINES})
+  endif()
+
+  # TODO currently we don't install googletest alongside !PROJECT_NAME_LOWER! sources, so
+  # installed !PROJECT_NAME_LOWER! can't be tested.
+  if(NOT !PROJECT_NAME_CAPITAL!_CC_LIB_TESTONLY AND !PROJECT_NAME_CAPITAL!_ENABLE_INSTALL)
+
+    install(TARGETS ${_NAME} EXPORT ${PROJECT_NAME}Targets
+          RUNTIME DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_BINDIR}
+          LIBRARY DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR}
+          ARCHIVE DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR}
+    )
+
+
+    list(APPEND !PROJECT_NAME_CAPITAL!_MODULES ${_NAME})
+    list(REMOVE_DUPLICATES !PROJECT_NAME_CAPITAL!_MODULES)
+    set(!PROJECT_NAME_CAPITAL!_MODULES "${!PROJECT_NAME_CAPITAL!_MODULES}" CACHE INTERNAL "!PROJECT_NAME_CAPITAL!_MODULES")
+
+
+  endif()
+
+    add_library(!PROJECT_NAME_LOWER!::${!PROJECT_NAME_CAPITAL!_CC_LIB_NAME} ALIAS ${_NAME})
+endfunction()
+
+# !PROJECT_NAME_LOWER!_cc_test()
+#
+# CMake function to imitate Bazel's cc_test rule.
+#
+# Parameters:
+# NAME: name of target (see Usage below)
+# SRCS: List of source files for the binary
+# DEPS: List of other libraries to be linked in to the binary targets
+# COPTS: List of private compile options
+# DEFINES: List of public defines
+# LINKOPTS: List of link options
+#
+# Note:
+# By default, !PROJECT_NAME_LOWER!_cc_test will always create a binary named !PROJECT_NAME_LOWER!_${NAME}.
+# This will also add it to ctest list as !PROJECT_NAME_LOWER!_${NAME}.
+#
+# Usage:
+# !PROJECT_NAME_LOWER!_cc_library(
+#   NAME
+#     awesome
+#   HDRS
+#     "a.h"
+#   SRCS
+#     "a.cc"
+#   PUBLIC
+# )
+#
+# !PROJECT_NAME_LOWER!_cc_test(
+#   NAME
+#     awesome_test
+#   SRCS
+#     "awesome_test.cc"
+#   DEPS
+#     !PROJECT_NAME_LOWER!::awesome
+#     gmock
+#     gtest_main
+# )
+function(!PROJECT_NAME_LOWER!_cc_test)
+  if(NOT !PROJECT_NAME_CAPITAL!_RUN_TESTS)
+    return()
+  endif()
+
+  cmake_parse_arguments(!PROJECT_NAME_CAPITAL!_CC_TEST
+    ""
+    "NAME"
+    "SRCS;COPTS;DEFINES;LINKOPTS;DEPS"
+    ${ARGN}
+  )
+
+  set(_NAME "!PROJECT_NAME_LOWER!_${!PROJECT_NAME_CAPITAL!_CC_TEST_NAME}_test")
+
+  add_executable(${_NAME} "")
+  target_sources(${_NAME} PRIVATE ${!PROJECT_NAME_CAPITAL!_CC_TEST_SRCS})
+  target_include_directories(${_NAME}
+    PUBLIC ${!PROJECT_NAME_CAPITAL!_COMMON_INCLUDE_DIRS}
+    PRIVATE ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+  )
+
+  target_compile_definitions(${_NAME}
+          PUBLIC
+          ${!PROJECT_NAME_CAPITAL!_CC_TEST_DEFINES}
+          )
+  target_compile_options(${_NAME}
+    PRIVATE ${!PROJECT_NAME_CAPITAL!_CC_TEST_COPTS}
+  )
+
+  target_link_libraries(${_NAME}
+    PUBLIC ${!PROJECT_NAME_CAPITAL!_CC_TEST_DEPS}
+    PRIVATE ${!PROJECT_NAME_CAPITAL!_CC_TEST_LINKOPTS}
+  )
+  # Add all !PROJECT_NAME! targets to a folder in the IDE for organization.
+  set_property(TARGET ${_NAME} PROPERTY FOLDER ${!PROJECT_NAME_CAPITAL!_IDE_FOLDER}/test)
+
+  set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD ${!PROJECT_NAME_CAPITAL!_CXX_STANDARD})
+  set_property(TARGET ${_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+  add_test(NAME ${_NAME} COMMAND ${_NAME})
+endfunction()
+
+
+function(check_target my_target)
+  if(NOT TARGET ${my_target})
+    message(FATAL_ERROR " !PROJECT_NAME_CAPITAL!: compiling !PROJECT_NAME_LOWER! requires a ${my_target} CMake target in your project,
+                   see CMake/README.md for more details")
+  endif(NOT TARGET ${my_target})
+endfunction()

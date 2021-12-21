@@ -8,7 +8,10 @@ from .arguments_parser import ArgumentsParser
 from .dependency_builder import DependencyBuilder
 from .flag_observer import FlagObserver
 from .cmake import CMakeArguments
-from .logger import logger
+from .logger import logger, set_global_verbose
+from .template_parser import TemplateGenerator
+from .templates_path_loader import TEMPLATES_PATH
+import atexit
 import sys
 
 
@@ -18,17 +21,46 @@ class BlitzManager(object):
     __package_manager: PackageManager
     __dependency_builder: DependencyBuilder
 
-    def __init__(self, manager_output_path: Path,
-                 build_output_path: Path,
-                 install_output_path: Path,
-                 package_manager: SupportedManagers):
+    def __init__(self):
+        atexit.register(self.__exit_handler)
+        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for manging C/C++ dependencies.")
+        self.__flags = {}
+        self.__manager_initializer = None
+        self.__package_manager = None
+
+        self.__dependencies = {}
+        self.list_managers = False
+        self.list_templates = False
+        self.verbose = 5
+        self.version = False
+        self.version_info = "0.0.0"
+        self.clear_flags()
+
+    def __exit_handler(self):
         """
 
+        :return:
+        """
+
+    def initialize(self, manager_output_path: Path,
+                   build_output_path: Path,
+                   install_output_path: Path,
+                   package_manager: SupportedManagers,
+                   source_root_path: Path = None):
+        """
+
+        :param source_root_path: Optional source root path to avoid giving the input path, when building from source code.
         :param manager_output_path: Path for the blitz-manager output. (downloaded zip files and to build external tools)
         :param build_output_path: Path for building external dependencies you specify.
         :param install_output_path: Path for installing the external dependencies.
         :param package_manager: The C/C++ package manger you wish to use.
+        :return:
         """
+        if source_root_path is not None:
+            if not (source_root_path.is_dir() or source_root_path.is_abs()):
+                raise RuntimeError(f"Source root path: {source_root_path} is not a directory.")
+        else:
+            source_root_path = Path.cwd()
         if manager_output_path.is_file():
             raise RuntimeError(f"Manager output path is a file : {manager_output_path}")
         if build_output_path.is_file():
@@ -39,23 +71,17 @@ class BlitzManager(object):
         build_output_path.make(directory=True, ignore_errors=True)
         install_output_path.make(directory=True, ignore_errors=True)
 
-        logger.info(f"Manager output path : {manager_output_path}")
-        logger.info(f"Build output path : {build_output_path}")
-        logger.info(f"Install output path : {install_output_path}")
-
+        logger.info(f"Manager output path : {manager_output_path}", verbose=10)
+        logger.info(f"Build output path : {build_output_path}", verbose=10)
+        logger.info(f"Install output path : {install_output_path}", verbose=10)
+        logger.info(f"Source root directory : {source_root_path}", verbose=10)
         self.__manager_output_path = manager_output_path
         self.__build_output_path = build_output_path
         self.__install_output_path = install_output_path
         self.__package_manager_type = package_manager
-        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for manging C/C++ dependencies.")
-        self.__flags = {}
-        self.__manager_initializer = None
-        self.__package_manager = None
+        self.__source_root_path = source_root_path
         self.__dependency_builder = DependencyBuilder(output_dir=self.__build_output_path)
-        self.__dependencies = {}
-        self.list_managers = False
-        self.verbose = 5
-        self.clear_flags()
+        return self
 
     def __add_default_flags(self):
         """
@@ -70,6 +96,12 @@ class BlitzManager(object):
         self.add_flag("--list_managers", default=False,
                       help="List of supported C/C++ package managers.",
                       action="store_true")
+        self.add_flag("--list_templates", default=False, help="List available CMake templates.",
+                      action="store_true")
+        self.add_flag("--version",
+                      help="Display version information",
+                      default=False,
+                      action="store_true")
 
     def __list_mangers(self):
         """
@@ -77,7 +109,7 @@ class BlitzManager(object):
         :return:
         """
         for i, m in enumerate(ManagerInitializer.supported_managers()):
-            logger.info(f"Manager [{i}] : {m}")
+            logger.info(f"Manager [{i}] : {m}", verbose=0)
         sys.exit(0)
 
     def __call_default_flags(self):
@@ -87,6 +119,17 @@ class BlitzManager(object):
         """
         if self.list_managers:
             self.__list_mangers()
+        if self.list_templates:
+            TemplateGenerator.list_available_templates(TEMPLATES_PATH)
+            sys.exit(0)
+        if self.version:
+            print(f"""
+            BlitzManager version {self.version_info}
+
+            See the LICENSE file for license information.
+            """)
+            sys.exit(0)
+        set_global_verbose(self.verbose)
 
     @property
     def arguments_parser(self) -> ArgumentsParser:
@@ -124,6 +167,18 @@ class BlitzManager(object):
         self.__arguments_parser.add_flag(flag, *args, **kwargs)
         return self
 
+    def add_flags(self, flags: dict):
+        """
+
+        :param flags: dictionary of flags as keys and options as value.
+        :return:
+        """
+        for flag in flags.keys():
+            if not isinstance(flags[flag], dict):
+                raise RuntimeError("Flag value must also be a dictionary")
+            self.add_flag(flag, **flags[flag])
+        return self
+
     def add_flag_observer(self, flag: str, observer: FlagObserver):
         """
 
@@ -134,6 +189,25 @@ class BlitzManager(object):
         if flag not in self.__arguments_parser.flags:
             raise RuntimeError(f"Flag {flag} is not set.")
         self.__flags[flag] = observer
+        return self
+
+    def create_template(self, template_name: str, config: dict, output_dir: Path):
+        """
+
+        :param template_name:
+        :param config: meta information about the template
+        :param output_dir:
+        :return:
+        """
+        if output_dir.is_file():
+            raise RuntimeError("Output directory is a file.")
+        template_path = TEMPLATES_PATH.copy().join(template_name)
+        build_dir = output_dir.copy()
+
+        config["template_path"] = template_path
+        config["build_dir"] = build_dir
+        generator = TemplateGenerator(config)
+        generator.generate()
         return self
 
     def notify_flag_observers(self):
@@ -163,7 +237,7 @@ class BlitzManager(object):
         Parse command line arguments.
         :return:
         """
-        self.clear_flags()
+
         self.__arguments_parser.parse(namespace=self)
         self.__call_default_flags()
         return self
@@ -174,11 +248,19 @@ class BlitzManager(object):
         :return:
         """
         if self.__package_manager_type is SupportedManagers.NONE:
-            logger.info("Skipping initialization step for the package managers.")
+            logger.info("Skipping initialization step for the package managers.", verbose=3)
             return self
         self.__manager_initializer = ManagerInitializer(output_path=self.__manager_output_path)
-        self.__manager_initializer.download(override=override).build()
-        self.__package_manager = self.__manager_initializer.managers[self.__package_manager_type.value]
+        try:
+            self.__manager_initializer.download(override=override).build()
+        except KeyboardInterrupt as e:
+            logger.error("KeyboardInterrupt. You may need to remove the output directory.")
+        try:
+            self.__package_manager = self.__manager_initializer.managers[self.__package_manager_type.value]
+        except IndexError:
+            logger.error(
+                "IndexError. You need to delete the output directory to solve this problem."
+                " This happens if previous download didn't complete")
         return self
 
     def clear_dependencies(self):
@@ -195,18 +277,18 @@ class BlitzManager(object):
         :return:
         """
         for dep in self.__dependencies.keys():
-            logger.info(f"Started building : [{dep}] ..")
+            logger.info(f"Started building : [{dep}] ..", verbose=3)
             input_dir, cmake_args, delete_cache = self.__dependencies[dep]
             if input_dir is None and cmake_args is None:
                 if self.__package_manager_type is SupportedManagers.NONE:
-                    logger.info(f"Skipping dependency [{dep}]")
+                    logger.info(f"Skipping dependency [{dep}]", verbose=3)
                     continue
                 self.__dependency_builder.build_via_package_manager(dep, self.__package_manager)
                 continue
             self.__dependency_builder.build_from_source(dep, input_dir, cmake_args, delete_cache=delete_cache)
         return self
 
-    def build_from_source(self, dependency: str, input_dir: Path, *args, **kwargs):
+    def build_from_source(self, dependency: str, *args, input_dir: Path = None, **kwargs, ):
         """
 
         :param dependency: Name of the dependency.
@@ -215,6 +297,11 @@ class BlitzManager(object):
         :param args: Arguments to pass to cmake directly.
         :return:
         """
+        if input_dir is None:
+            if self.__source_root_path is None:
+                raise RuntimeError(
+                    f"Input directory and source root path are both not set. Unable to locate [{dependency}]")
+            input_dir = Path(self.__source_root_path.path, dependency)
         install_path = kwargs.pop("install_path", self.__install_output_path)
         generator = kwargs.pop("generator", None)
         build_type = kwargs.pop("build_type", "Release")
@@ -242,6 +329,8 @@ class BlitzManager(object):
         :param dependencies:
         :return:
         """
+        if self.__package_manager_type == SupportedManagers.NONE:
+            return self
         for dependency in dependencies:
             self.__dependencies[dependency] = (None, None, None)
         return self

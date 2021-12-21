@@ -1,0 +1,120 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/AgreementWindow.h"
+
+
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QPlainTextEdit>
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QSettings>
+#include <iostream>
+#include <QWebEngineView>
+
+#define ORGANIZATION "Eternity"
+#define PROJECT_NAME "!PROJECT_NAME!"
+#define PROJECT_VERSION "dev-0.0.0-alpha"
+
+#define BOLD_ "<span style=\" font-weight:600;\">"
+#define _BOLD "</span>"
+
+namespace View{
+    bool acceptTheAgreement(int argc, char **argv) {
+        QApplication app(argc, argv);
+
+        QCoreApplication::setOrganizationName(ORGANIZATION);
+        QCoreApplication::setApplicationName(PROJECT_NAME);
+        QCoreApplication::setApplicationVersion(PROJECT_VERSION);
+        QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+        bool wasAccepted = settings.value("Agreement",false).toBool();
+
+        if(wasAccepted)
+            return true;
+
+        AgreementWindow agreementWindow;
+
+        agreementWindow.show();
+
+        int status =  QApplication::exec();
+
+        printf(" Agreement exit status %d \n",status);
+        if(status != 0)
+            return false;
+
+
+        return agreementWindow.acceptedTheAgreement;
+
+    }
+    AgreementWindow::AgreementWindow() {
+
+        const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+
+        resize(availableGeometry.width() / 2 , availableGeometry.height() / 2);
+        move((availableGeometry.width() - width()) / 2,
+             (availableGeometry.height() - height()) / 2);
+
+
+        webEngineView = new QWebEngineView();
+
+        QFile file(":/static/html/Agreement.html");
+        file.open(QFile::OpenModeFlag::ReadOnly);
+
+        QString content = file.readAll();
+
+        webEngineView->setHtml(content);
+        file.close();
+
+        groupBox = new QGroupBox();
+        qvBoxLayout = new QVBoxLayout();
+        buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                         | QDialogButtonBox::No);
+
+        buttonBox->button(QDialogButtonBox::Ok)->setText("Accept");
+        buttonBox->button(QDialogButtonBox::No)->setText("Exit");
+
+        qvBoxLayout->addWidget(webEngineView);
+        qvBoxLayout->addWidget(buttonBox);
+
+        groupBox->setLayout(qvBoxLayout);
+
+        setCentralWidget(groupBox);
+
+        connect(buttonBox, &QDialogButtonBox::rejected, this, &AgreementWindow::reject);
+        connect(buttonBox, &QDialogButtonBox::accepted, this, &AgreementWindow::accept);
+        setFixedWidth(1024);
+        setMinimumHeight(300);
+    }
+
+    void AgreementWindow::accept() {
+        QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+        settings.setValue("Agreement",true);
+        acceptedTheAgreement = true;
+        close();
+    }
+
+    void AgreementWindow::reject() {
+        QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+        settings.setValue("Agreement",false);
+        acceptedTheAgreement = false;
+        close();
+    }
+
+    AgreementWindow::~AgreementWindow() {
+        delete webEngineView;
+        delete buttonBox;
+        delete qvBoxLayout;
+        delete groupBox;
+    }
+
+    void AgreementWindow::closeEvent(QCloseEvent *event) {
+        QWidget::closeEvent(event);
+    }
+
+
+}

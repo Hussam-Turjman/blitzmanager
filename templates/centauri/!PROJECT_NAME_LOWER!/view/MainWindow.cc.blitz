@@ -1,0 +1,217 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/MainWindow.h"
+
+#include "!PROJECT_NAME_LOWER!/view/ServerWidget.h"
+
+#include "!PROJECT_NAME_LOWER!/view/VideoScene.h"
+#include "!PROJECT_NAME_LOWER!/view/GroupHBoxLayout.h"
+
+#include "!PROJECT_NAME_LOWER!/controller/VideoSinkSource.h"
+
+#include <decentrtc/logging/Logger.h>
+
+#include <QSplitter>
+#include <QVBoxLayout>
+#include <QAction>
+
+#include <QStatusBar>
+#include <QCloseEvent>
+#include <QGroupBox>
+#include <QToolBar>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QMenu>
+#include <QMenuBar>
+
+namespace View
+{
+
+    static void setSignals(MainWindow *mainWindow, Controller::VideoSinkSource *camera)
+    {
+        const VideoScene *localVideoScene = mainWindow->getLocalVideoScene();
+
+        QObject::connect(mainWindow, &MainWindow::runClicked, camera, &Controller::VideoSinkSource::start);
+        QObject::connect(camera, &Controller::VideoSinkSource::starting, localVideoScene, &VideoScene::startSurface);
+        QObject::connect(camera, &Controller::VideoSinkSource::onFrameSignal, localVideoScene, &VideoScene::present);
+        QObject::connect(mainWindow, &MainWindow::stopClicked, localVideoScene, &VideoScene::stopSurface);
+
+        QObject::connect(mainWindow, &MainWindow::stopClicked, camera, &Controller::VideoSinkSource::stop);
+    }
+
+    int runMainWindow(int argc, char **argv)
+    {
+        int status;
+        status = 0;
+        QApplication app(argc, argv);
+
+        MainWindow window;
+        Controller::VideoSinkSource videoSink(1280, 720, 30, QVideoFrame::PixelFormat::Format_ARGB32);
+
+        setSignals(&window, &videoSink);
+
+        window.show();
+
+        status = QApplication::exec();
+
+        return status;
+    }
+
+    MainWindow::MainWindow() : QMainWindow()
+    {
+        runAct = nullptr;
+        stopAct = nullptr;
+
+        serverWidget = new ServerWidget();
+        mainSplitter = new QSplitter(Qt::Vertical);
+        upperSplitter = new QSplitter(Qt::Horizontal);
+
+        vLayout = new QVBoxLayout();
+        groupBox = new QGroupBox();
+
+        localVideoScene = new VideoScene();
+        remoteVideoScene = new VideoScene();
+
+        localGroupBox = new GroupHBoxLayout("Local Render");
+        remoteGroupBox = new GroupHBoxLayout("Remote Render");
+        peersGroupBpx = new GroupHBoxLayout("Currently Connected Peers");
+
+        localGroupBox->addWidget(localVideoScene);
+        remoteGroupBox->addWidget(remoteVideoScene);
+
+        upperSplitter->addWidget(localGroupBox);
+        upperSplitter->addWidget(remoteGroupBox);
+        upperSplitter->addWidget(peersGroupBpx);
+
+        mainSplitter->addWidget(serverWidget);
+        mainSplitter->addWidget(upperSplitter);
+        mainSplitter->setSizes({10, 1000});
+
+        vLayout->addWidget(mainSplitter);
+        groupBox->setLayout(vLayout);
+
+        setCentralWidget(groupBox);
+        setGeometry();
+        createFileToolBar();
+        createRunToolBar();
+        connectSignals();
+
+        statusBar()->showMessage("Ready");
+    }
+
+    void MainWindow::closeEvent(QCloseEvent *event)
+    {
+        if (!runAct->isEnabled())
+        {
+            Stop(false);
+            event->ignore();
+            closeEvent(event);
+            return;
+        }
+        QWidget::closeEvent(event);
+    }
+
+    void MainWindow::setGeometry()
+    {
+        const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+        resize((availableGeometry.width() / 2), (availableGeometry.height() / 2));
+        //resize(1500,800);
+        move((availableGeometry.width() - width()) / 2,
+             (availableGeometry.height() - height()) / 2);
+    }
+
+    void MainWindow::cleanUp()
+    {
+        delete runAct;
+        delete stopAct;
+
+        delete localVideoScene;
+        delete remoteVideoScene;
+
+        delete localGroupBox;
+        delete remoteGroupBox;
+        delete peersGroupBpx;
+
+        delete serverWidget;
+        delete upperSplitter;
+        delete mainSplitter;
+
+        delete vLayout;
+        delete groupBox;
+    }
+
+    MainWindow::~MainWindow()
+    {
+        cleanUp();
+    }
+
+    void MainWindow::createFileToolBar()
+    {
+        QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+
+        const QIcon exitIcon(":/images/exit.png");
+        QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+        exitAct->setShortcuts(QKeySequence::Quit);
+
+        exitAct->setStatusTip("Exit the application");
+    }
+
+    void MainWindow::createRunToolBar()
+    {
+        QToolBar *runToolBar = addToolBar(tr("Run"));
+
+        const QIcon runIcon(":/images/run.png");
+        runAct = new QAction(runIcon, tr("&Run"), this);
+        runAct->setObjectName("RunAct");
+        runAct->setStatusTip("Start the camera");
+
+        runToolBar->addAction(runAct);
+
+        const QIcon stopIcon(":/images/stop.png");
+        stopAct = new QAction(stopIcon, tr("&Stop"), this);
+        stopAct->setObjectName("StopAct");
+
+        stopAct->setStatusTip("Stop the camera");
+
+        stopAct->setEnabled(false);
+
+        runToolBar->addAction(stopAct);
+    }
+
+    void MainWindow::connectSignals()
+    {
+        connect(runAct, &QAction::triggered, this, &MainWindow::Run);
+        connect(stopAct, &QAction::triggered, this, &MainWindow::Stop);
+    }
+
+    void MainWindow::Run(bool checked)
+    {
+        const bool startStatus = emit runClicked();
+        switchButtonsStatus();
+    }
+
+    void MainWindow::Stop(bool checked)
+    {
+        emit stopClicked();
+        switchButtonsStatus();
+    }
+
+    void MainWindow::switchButtonsStatus()
+    {
+        runAct->setEnabled(!runAct->isEnabled());
+        stopAct->setEnabled(!stopAct->isEnabled());
+    }
+
+    const VideoScene *MainWindow::getLocalVideoScene()
+    {
+        return localVideoScene;
+    }
+
+    const VideoScene *MainWindow::getRemoteVideoScene()
+    {
+        return remoteVideoScene;
+    }
+
+}

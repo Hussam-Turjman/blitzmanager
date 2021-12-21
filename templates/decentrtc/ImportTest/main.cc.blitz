@@ -1,0 +1,16 @@
+
+#include <iostream>
+
+#include <!PROJECT_NAME_LOWER!/logging/Logger.h>
+
+#include <iostream>
+#include <memory>
+
+
+int main(int argc, char **argv)
+{
+
+   PRINT_LOG(logging::Level::INFO, "Created  video capture device ");
+    
+    return 0;
+}

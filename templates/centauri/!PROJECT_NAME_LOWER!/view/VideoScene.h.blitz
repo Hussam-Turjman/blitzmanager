@@ -1,0 +1,53 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_VIEW_VIDEOSCENE_H
+#define CAMERA_VIEW_VIDEOSCENE_H
+
+#include <QWidget>
+
+QT_BEGIN_NAMESPACE
+class QVideoSurfaceFormat;
+
+class QGraphicsView;
+
+class QHBoxLayout;
+
+class QGraphicsVideoItem;
+
+class QGraphicsScene;
+
+class QVideoFrame;
+
+QT_END_NAMESPACE
+
+namespace View {
+    class MockedSurface;
+
+    class VideoScene : public QWidget {
+    Q_OBJECT
+    public:
+        explicit VideoScene(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+        ~VideoScene() override;
+
+    public slots:
+
+        bool startSurface(const QVideoSurfaceFormat &format);
+
+        void stopSurface();
+
+        bool present(const QVideoFrame &frame);
+
+    private:
+        QGraphicsView *graphicsView;
+        QHBoxLayout *qhBoxLayout;
+        QGraphicsVideoItem *graphicsVideoItem;
+        QGraphicsScene *graphicsScene;
+        MockedSurface *mockedSurface;
+
+    };
+}
+
+
+#endif //CAMERA_VIEW_VIDEOSCENE_H

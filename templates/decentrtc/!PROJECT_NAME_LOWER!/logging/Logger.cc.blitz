@@ -1,0 +1,131 @@
+/*
+ * Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+ * source code is governed by a BSD-style license that can be found in the LICENSE file.
+ */
+
+#include "!PROJECT_NAME_LOWER!/logging/Logger.h"
+#include <cstdlib>
+
+#include <new>
+#include <memory>
+#include <cstring>
+#include <sstream>
+
+#define LOG_BUF_SIZE 4096
+
+
+namespace logging
+{
+
+    Logger &Logger::getInstance()
+    {
+        static Logger globalLogger;
+
+        return globalLogger;
+    }
+    const char *Logger::levelName(Level level)
+    {
+        switch (level)
+        {
+        case Level::WARNING:
+            return "WARNING";
+        case Level::INFO:
+            return "INFO";
+        case Level::ERROR:
+            return "ERROR";
+        case Level::CRITICAL:
+            return "CRITICAL";
+        case Level::PANIC:
+            return "PANIC";
+        case Level::DEBUG:
+            return "DEBUG";
+
+        default:
+            return "UNKNOWN";
+        }
+    }
+
+    Logger::Logger()
+    {
+    }
+
+    void Logger::log(Level level, const char *file, const char *function, int line, const char *format, va_list args)
+    {
+
+        FILE *stream = stdout;
+
+        switch (level)
+        {
+        case Level::ERROR:
+        case Level::CRITICAL:
+        case Level::WARNING:
+        case Level::PANIC:
+            stream = stderr;
+            break;
+        default:
+            break;
+        }
+
+        if (level == Level::DEBUG)
+        {
+            fprintf(stream, "[%-8s][%s-%s-%d] ", levelName(level), file, function, line);
+        }
+        else
+        {
+            std::stringstream ss;
+            
+#if IS_LINUX
+            ss << "\033[1;";
+            switch (level)
+            {
+            case Level::INFO:
+                ss << "32";
+                break;
+             case Level::WARNING:
+                ss << "33";
+                break;
+                case Level::ERROR:
+                case Level::CRITICAL:
+                case Level::PANIC:
+                ss << "31";
+                break;
+                
+            default:
+            ss << "37";
+                break;
+            }
+            ss << "m";
+
+#endif 
+            ss << levelName(level);
+
+#if IS_LINUX
+            ss << "\033[0m";
+#endif 
+            fprintf(stream, "[%-8s] ", ss.str().c_str());
+            
+        }
+
+        vfprintf(stream, format, args);
+
+#ifdef _WIN32
+        fprintf(stream, "\n\r");
+#else
+        fprintf(stream, "\n");
+#endif
+
+        if (level == Level::PANIC)
+            abort();
+    }
+
+    void log(Level level, const char *file, const char *function, int line, const char *format, ...)
+    {
+        va_list ap;
+        va_start(ap, format);
+
+        Logger::getInstance().log(level, file, function, line, format, ap);
+
+        va_end(ap);
+    }
+
+}

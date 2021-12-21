@@ -1,0 +1,9 @@
+
+#include <iostream>
+#include <!PROJECT_NAME_LOWER!/module_a/Foo.h>
+
+int main(int argc, char** argv) {
+  foo();
+  return 0;
+
+}

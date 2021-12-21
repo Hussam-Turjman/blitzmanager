@@ -1,0 +1,14 @@
+!BLITZ_NOTICE!
+
+!COPYRIGHT!
+
+cmake_minimum_required(VERSION 3.17)
+project(ImportTest)
+
+find_package(!PROJECT_NAME! REQUIRED)
+
+message(STATUS "DUMMY_INCLUDE_DIR : ${!PROJECT_NAME_CAPITAL!_INCLUDE_DIR}")
+include_directories(BEFORE PRIVATE ${!PROJECT_NAME_CAPITAL!_INCLUDE_DIR})
+
+add_executable(${PROJECT_NAME} main.cc)
+target_link_libraries(${PROJECT_NAME} ${!PROJECT_NAME_CAPITAL!})

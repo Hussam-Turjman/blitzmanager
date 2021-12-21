@@ -1,0 +1,31 @@
+# Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+# source code is governed by a BSD-style license that can be found in the LICENSE file.
+
+
+!PROJECT_NAME_LOWER!_cc_library(
+        NAME
+        view
+        HDRS
+        "AgreementWindow.h"
+        "GroupHBoxLayout.h"
+        "MainWindow.h"
+        "MockedSurface.h"
+        "ServerWidget.h"
+        "VideoRender.h"
+        "VideoScene.h"
+        COPTS
+        ${!PROJECT_NAME_CAPITAL!_DEFAULT_COPTS}
+        SRCS
+        "AgreementWindow.cc"
+        "GroupHBoxLayout.cc"
+        "MainWindow.cc"
+        "MainWindowActions.cc"
+        "MockedSurface.cc"
+        "ServerWidget.cc"
+        "VideoRender.cc"
+        "VideoScene.cc"
+        DEPS
+        ${!PROJECT_NAME_CAPITAL!_QT_LIBS}
+        !PROJECT_NAME_LOWER!::controller 
+        PUBLIC
+)

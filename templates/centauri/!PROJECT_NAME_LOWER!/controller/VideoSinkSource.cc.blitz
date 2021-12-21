@@ -1,0 +1,101 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/controller/VideoSinkSource.h"
+#include <decentrtc/logging/Logger.h>
+
+#include <QVideoSurfaceFormat>
+
+#include <memory>
+#include <new>
+
+namespace Controller
+{
+
+    VideoSinkSource::VideoSinkSource(int width,
+                                     int height,
+                                     int fps,
+                                     QVideoFrame::PixelFormat format,
+                                     QObject *parent) : QObject(parent),
+                                                        surfaceFormat(QSize(width, height),
+                                                                      format),
+                                                        capture(), videoFrame()
+    {
+        if (!videoFrame.init())
+            PRINT_LOG(logging::Level::LOG_ERROR, "Failed to initialize videoFrame");
+
+        if (!capture.init())
+            PRINT_LOG(logging::Level::LOG_ERROR, "Failed to initialize video capture");
+
+        frameWidth = width;
+        frameHeight = height;
+        this->fps = fps;
+        this->format = format;
+        device_id = 0;
+    }
+
+    bool VideoSinkSource::start()
+    {
+        video_cap::DeviceCapability cap;
+        cap.frame_rate = fps;
+        cap.id = 0;
+        cap.frameInfo.height = 720;
+        cap.frameInfo.width = 1280;
+
+        capture.registerFrameCallback(this);
+        
+        
+        const bool status = capture.start(cap, video_cap::PixelFormat::MJPEG);
+
+        
+        if (status)
+            emit starting(surfaceFormat);
+
+        return status;
+    }
+
+    bool VideoSinkSource::stop()
+    {
+
+        capture.deregisterFrameCallback();
+
+        return capture.stop();
+    }
+
+    VideoSinkSource::~VideoSinkSource()
+    {
+        stop();
+    }
+
+    void VideoSinkSource::onFrame(const video_cap::CaptureFrame &frame)
+    {
+       
+        
+        if (videoFrame.reset(frame) && videoFrame.flip())
+        {
+
+            //printf(" Converting to argb was successful \n");
+            QImage qImage(videoFrame.bits(),
+                          videoFrame.width(),
+                          videoFrame.height(),
+                          QImage::Format_ARGB32,
+                          nullptr, nullptr);
+
+            QVideoFrame qVideoFrame(qImage);
+            if (qVideoFrame.isValid())
+            {
+
+                printf(" Sending frame :%d %d , VideoFrame : %d , timestamp %lld \n",
+                       qVideoFrame.width(),
+                       qVideoFrame.height(),
+                       qVideoFrame.isValid(),
+                       videoFrame.ntpTimeMs());
+                emit onFrameSignal(qVideoFrame);
+            }
+        }
+        
+
+    }
+
+}

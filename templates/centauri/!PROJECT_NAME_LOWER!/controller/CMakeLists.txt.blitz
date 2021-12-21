@@ -1,0 +1,22 @@
+# Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+# source code is governed by a BSD-style license that can be found in the LICENSE file.
+
+
+!PROJECT_NAME_LOWER!_cc_library(
+        NAME
+        controller
+        HDRS
+        "Init.h"
+        "VideoSinkSource.h"
+     
+        COPTS
+        ${!PROJECT_NAME_CAPITAL!_DEFAULT_COPTS}
+        SRCS
+        "Init.cc"
+        "VideoSinkSource.cc"
+     
+        DEPS
+        ${!PROJECT_NAME_CAPITAL!_QT_LIBS}
+        decentrtc::video_cap
+        PUBLIC
+)

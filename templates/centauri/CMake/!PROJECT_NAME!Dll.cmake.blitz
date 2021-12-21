@@ -1,0 +1,77 @@
+# Auto generated file by blitz 2021-03-12-15:40:56. Blitz is a tool for generating cmake 
+# templates, written by (Mohammed Hussam Al Turjman, hussam.turjman@gmail.com). 
+# For more information please visit https://github.com/Hussam-Turjman/LibraryTemplate
+
+include(CMakeParseArguments)
+
+set(!PROJECT_NAME_CAPITAL!_DLL_FILES
+        "module_a/Foo.h"
+        "module_a/Foo.cc"
+        "module_a/internal/FooInternal.h"
+        "module_a/internal/FooInternal.cc"
+        "module_b/Boo.h"
+        "module_b/Boo.cc"
+        "module_b/internal/BooInternal.cc"
+        )
+
+
+set(!PROJECT_NAME_CAPITAL!_DLL_EXTERNAL_TARGETS
+        "yuv"
+        "vpx"
+        "Threads::Threads"
+        )
+
+
+function(!PROJECT_NAME_LOWER!_make_dll)
+    message(FATAL_ERROR "Not implemented yet")
+    
+    list(APPEND !PROJECT_NAME_CAPITAL!_MODULES !PROJECT_NAME_LOWER!_dll)
+    list(REMOVE_DUPLICATES !PROJECT_NAME_CAPITAL!_MODULES)
+    set(!PROJECT_NAME_CAPITAL!_MODULES "${!PROJECT_NAME_CAPITAL!_MODULES}" CACHE INTERNAL "!PROJECT_NAME_CAPITAL!_MODULES")
+
+    add_library(
+            !PROJECT_NAME_LOWER!_dll
+            SHARED
+            "${!PROJECT_NAME_CAPITAL!_DLL_FILES}"
+    )
+    target_link_libraries(
+            !PROJECT_NAME_LOWER!_dll
+            PRIVATE
+            ${!PROJECT_NAME_CAPITAL!_DEFAULT_LINKOPTS}
+    )
+
+    target_link_libraries(!PROJECT_NAME_LOWER!_dll
+            PUBLIC
+            ${!PROJECT_NAME_CAPITAL!_DLL_EXTERNAL_TARGETS}
+            )
+
+    set_property(TARGET !PROJECT_NAME_LOWER!_dll PROPERTY LINKER_LANGUAGE "CXX")
+    target_include_directories(
+            !PROJECT_NAME_LOWER!_dll
+            PUBLIC
+            "$<BUILD_INTERFACE:${!PROJECT_NAME_CAPITAL!_COMMON_INCLUDE_DIRS}>"
+            $<INSTALL_INTERFACE:${!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR}>
+    )
+
+    target_compile_options(
+            !PROJECT_NAME_LOWER!_dll
+            PRIVATE
+            ${!PROJECT_NAME_CAPITAL!_DEFAULT_COPTS}
+    )
+
+    target_compile_definitions(
+            !PROJECT_NAME_LOWER!_dll
+            PRIVATE
+            EXPORTING_!PROJECT_NAME_CAPITAL!
+            PUBLIC
+            !PROJECT_NAME_CAPITAL!_BUILD_DLL
+            INTERFACE
+            ${!PROJECT_NAME_CAPITAL!_CC_LIB_DEFINES}
+    )
+    install(TARGETS !PROJECT_NAME_LOWER!_dll EXPORT ${PROJECT_NAME}Targets
+            RUNTIME DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR}
+            )
+endfunction()
+

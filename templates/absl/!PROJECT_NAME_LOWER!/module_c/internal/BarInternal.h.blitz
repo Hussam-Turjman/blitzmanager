@@ -1,0 +1,13 @@
+
+#ifndef !PROJECT_NAME_CAPITAL!_BARINTERNAL_H
+#define !PROJECT_NAME_CAPITAL!_BARINTERNAL_H
+
+
+class BarInternal {
+public:
+    BarInternal() = default;
+    void print();
+};
+
+
+#endif //!PROJECT_NAME_CAPITAL!_BARINTERNAL_H

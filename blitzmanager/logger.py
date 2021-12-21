@@ -56,6 +56,32 @@ def set_global_verbose(val: int):
     __verbose.val = val
 
 
+# Print iterations progress
+# https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
+def progress_bar(iteration: int, total: int, prefix='', suffix='', decimals=1, length=20, fill='█', print_end="\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    assert isinstance(iteration, int)
+    assert isinstance(total, int)
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
+
 class Formatter(logging.Formatter):
     def __init__(self, msg):
         """
@@ -208,12 +234,13 @@ class Logger(logging.Logger):
         if self.check_verbosity(kwargs):
             super(Logger, self).critical(msg, *args, **kwargs)
 
-    def dashed_line(self):
+    def dashed_line(self, verbose=0):
         """
 
         :return:
         """
-        self.info("-" * 40)
+        if verbose <= get_global_verbose():
+            print("-" * 40)
 
 
 logging.setLoggerClass(Logger)
@@ -268,4 +295,8 @@ logger.info("OS Name : {}".format(OS_NAME))
 logger.info("Architecture : {}".format(SYS_ARCH))
 logger.dashed_line()
 
-__all__ = ["logger", "get_global_verbose", "set_global_verbose", "set_exit_on_error"]
+__all__ = ["logger", "get_global_verbose",
+           "set_global_verbose",
+           "set_exit_on_error",
+           "progress_bar",
+           "reformat_comment"]

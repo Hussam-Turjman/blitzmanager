@@ -1,0 +1,9 @@
+
+
+#ifndef __BOO_H
+#define __BOO_H
+
+void boo();
+
+
+#endif

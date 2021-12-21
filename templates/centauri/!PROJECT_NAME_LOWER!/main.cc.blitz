@@ -1,0 +1,21 @@
+
+
+#include "decentrtc/logging/Logger.h"
+#include "!PROJECT_NAME_LOWER!/view/AgreementWindow.h"
+#include "!PROJECT_NAME_LOWER!/view/MainWindow.h"
+#include "!PROJECT_NAME_LOWER!/controller/Init.h"
+
+int main(int argc, char *argv[])
+{
+
+    if (!View::acceptTheAgreement(argc, argv))
+        return 0;
+
+    PRINT_LOG(logging::Level::INFO, "Alpha !PROJECT_NAME_LOWER! is the closest star ");
+
+    int status = View::runMainWindow(argc, argv);
+    printf(" Exit status %d \n", status);
+    Controller::cleanup();
+
+    return 0;
+}

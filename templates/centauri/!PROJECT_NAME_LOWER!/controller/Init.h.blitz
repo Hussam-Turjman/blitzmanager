@@ -1,0 +1,13 @@
+//
+// Created by hussam on 25.12.20.
+//
+
+#ifndef CAMERA_CONTROLLER_INIT_H
+#define CAMERA_CONTROLLER_INIT_H
+
+namespace Controller{
+    void init();
+    void cleanup();
+}
+
+#endif //CAMERA_CONTROLLER_INIT_H

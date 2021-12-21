@@ -1,0 +1,34 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_VIEW_GROUPHBOXLAYOUT_H
+#define CAMERA_VIEW_GROUPHBOXLAYOUT_H
+
+#include <QGroupBox>
+#include <QList>
+
+QT_BEGIN_NAMESPACE
+class QHBoxLayout;
+class QWidget;
+QT_END_NAMESPACE
+
+namespace View{
+
+    class GroupHBoxLayout : public QGroupBox{
+        Q_OBJECT
+    public:
+        explicit GroupHBoxLayout(const QString &title="GroupBox", QWidget *parent = nullptr);
+        ~GroupHBoxLayout() override;
+
+        void addWidget(QWidget*widget);
+
+    private:
+        QHBoxLayout *qhBoxLayout;
+
+    };
+}
+
+
+
+#endif //CAMERA_VIEW_GROUPHBOXLAYOUT_H

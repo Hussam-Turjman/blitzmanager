@@ -1,0 +1,7 @@
+
+#include "!PROJECT_NAME_LOWER!/module_a/internal/FooInternal.h"
+#include <iostream>
+
+void FooInternal::print() {
+    std::cout << " Foo internal " << std::endl;
+}

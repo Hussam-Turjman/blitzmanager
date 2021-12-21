@@ -1,0 +1,73 @@
+# Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+# source code is governed by a BSD-style license that can be found in the LICENSE file.
+
+include(CMakeParseArguments)
+
+macro(find_!PROJECT_NAME_LOWER!_package)
+    cmake_parse_arguments(!PROJECT_NAME_CAPITAL!_DEPENDENCY
+            ""
+            ${ARGN}
+            )
+
+    find_package(${ARGN})
+
+
+    set(_temp)
+    list(APPEND _temp ${ARGN} STOP)
+    list(APPEND !PROJECT_NAME_CAPITAL!_DEPENDENCIES ${_temp})
+    unset(_temp)
+
+endmacro()
+
+macro(import_!PROJECT_NAME_LOWER!_library)
+    cmake_parse_arguments(!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY
+            ""
+            "TARGET;TYPE;NAME_WIN;NAME_UNIX"
+            ""
+            ${ARGN} )
+
+    if ("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE}" STREQUAL "SHARED")
+        elseif("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE}" STREQUAL "STATIC")
+        else()
+        message(FATAL_ERROR "!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE must be either SHARED or STATIC . But got : ${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE}")
+    endif ()
+
+    if ("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TARGET is empty")
+    endif ()
+
+    if ("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_WIN}" STREQUAL "")
+        message(FATAL_ERROR "!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_WIN is empty")
+    endif ()
+
+    if ("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_UNIX}" STREQUAL "")
+        message(FATAL_ERROR "!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_UNIX is empty")
+    endif ()
+
+
+    add_library("${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TARGET}" "${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE}" IMPORTED)
+
+    if (WIN32)
+        set(_imported_lib_path "${CMAKE_PREFIX_PATH}/lib/${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_WIN}")
+    else()
+        set(_imported_lib_path "${CMAKE_PREFIX_PATH}/lib/${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_UNIX}")
+    endif ()
+
+    if (NOT EXISTS "${_imported_lib_path}")
+        message(FATAL_ERROR "The following path does not exist : ${_imported_lib_path}")
+    endif ()
+
+    file(TO_CMAKE_PATH  "${_imported_lib_path}" _imported_lib_cmake_path)
+
+    set_property(TARGET "${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TARGET}" PROPERTY
+            IMPORTED_LOCATION "${_imported_lib_path}")
+
+
+    set(_temp)
+    list(APPEND _temp ${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TARGET} ${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_TYPE} ${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_WIN} ${!PROJECT_NAME_CAPITAL!_IMPORTED_LIBRARY_NAME_UNIX} ${_imported_lib_cmake_path} STOP)
+    list(APPEND !PROJECT_NAME_CAPITAL!_IMPORTED_LIBS ${_temp})
+    unset(_temp)
+    unset(_imported_lib_path)
+    unset(_imported_lib_cmake_path)
+
+endmacro()

@@ -37,10 +37,10 @@ class ManagerInitializer(object):
             path = Path(self.output_path.path, f"{m.name()}.zip")
             output_dir = Path(self.output_path.path, f"{m.name()}_extracted")
 
-            if path.exist() and not override:
-                logger.info(f"{path} already exist")
-                if output_dir.exist():
-                    logger.info(f"{output_dir} already exist")
+            if path.exists() and not override:
+                logger.info(f"{path} already exist",verbose=10)
+                if output_dir.exists():
+                    logger.info(f"{output_dir} already exist",verbose=10)
                     self.managers.append(m(input_path=output_dir))
                     continue
                 if not path.unzip(output_dir):
@@ -59,7 +59,7 @@ class ManagerInitializer(object):
         """
         for m in self.managers:
             if not m.initialize():
-                logger.error(f"Failed to initialize the package manager : {m.name()}")
+                logger.error(f"Failed to initialize the package manager : {m.name()}",verbose=0)
                 return self
         return self
 

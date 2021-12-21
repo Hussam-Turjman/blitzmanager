@@ -1,0 +1,11 @@
+
+cmake_minimum_required(VERSION 3.5)
+project(!PROJECT_NAME_LOWER!_cmake_testing CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+
+add_executable(ImportTest main.cc)
+
+find_package(!PROJECT_NAME_LOWER! REQUIRED)
+
+target_link_libraries(ImportTest !PROJECT_NAME_LOWER!::module_a)

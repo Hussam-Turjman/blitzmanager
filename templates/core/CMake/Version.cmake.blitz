@@ -1,0 +1,56 @@
+!BLITZ_NOTICE!
+
+# Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this
+# source code is governed by a BSD-style license that can be found in the LICENSE file.
+
+macro(set_this_version)
+    cmake_parse_arguments(VERSION
+            "" # Options
+            "MAJOR;MINOR;PATCH" # One val
+            "NUMERIC;STAGE;TYPE" # Multi val
+            ${ARGN}
+            )
+
+
+    set(!PROJECT_NAME_CAPITAL!_VERSION_MAJOR ${VERSION_MAJOR})
+    set(!PROJECT_NAME_CAPITAL!_VERSION_MINOR ${VERSION_MINOR})
+    set(!PROJECT_NAME_CAPITAL!_VERSION_PATCH ${VERSION_PATCH})
+
+
+    set(!PROJECT_NAME_CAPITAL!_VERSION "${!PROJECT_NAME_CAPITAL!_VERSION_MAJOR}.${!PROJECT_NAME_CAPITAL!_VERSION_MINOR}.${!PROJECT_NAME_CAPITAL!_VERSION_PATCH}")
+
+    set(!PROJECT_NAME_CAPITAL!_VERSION_NUMERIC           ${VERSION_NUMERIC})
+
+    set(!PROJECT_NAME_CAPITAL!_VERSION_STAGE ${VERSION_STAGE})
+    set(!PROJECT_NAME_CAPITAL!_VERSION_TYPE  ${VERSION_TYPE})
+
+    set(ALLOWED_STAGE_NAMES
+            alpha
+            beta
+            stable
+            )
+    set(ALLOWED_TYPE_NAMES
+            dev
+            release
+            )
+
+    list(FIND ALLOWED_STAGE_NAMES "${!PROJECT_NAME_CAPITAL!_VERSION_STAGE}" STAGE_RET)
+    list(FIND ALLOWED_TYPE_NAMES "${!PROJECT_NAME_CAPITAL!_VERSION_TYPE}" TYPE_RET)
+
+    if (STAGE_RET EQUAL -1)
+        message(FATAL_ERROR "stage ${!PROJECT_NAME_CAPITAL!_VERSION_STAGE} is not allowed")
+    endif ()
+
+    if(TYPE_RET EQUAL -1)
+        message(FATAL_ERROR "type ${!PROJECT_NAME_CAPITAL!_VERSION_TYPE} is not allowed")
+    endif()
+
+    if(!PROJECT_NAME_CAPITAL!_VERSION_STAGE STREQUAL "stable")
+        if(!PROJECT_NAME_CAPITAL!_VERSION_TYPE STREQUAL "release")
+            set(!PROJECT_NAME_CAPITAL!_STABLE_RELEASE 1)
+        endif()
+    endif()
+
+    set(!PROJECT_NAME_CAPITAL!_PACKAGE_VERSION  "${!PROJECT_NAME_CAPITAL!_VERSION_TYPE}-${!PROJECT_NAME_CAPITAL!_VERSION_MAJOR}.${!PROJECT_NAME_CAPITAL!_VERSION_MINOR}.${!PROJECT_NAME_CAPITAL!_VERSION_PATCH}-${!PROJECT_NAME_CAPITAL!_VERSION_STAGE}")
+
+endmacro()

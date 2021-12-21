@@ -1,0 +1,23 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/GroupHBoxLayout.h"
+#include <QHBoxLayout>
+#include <QWidget>
+
+namespace View {
+
+    GroupHBoxLayout::GroupHBoxLayout(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
+        qhBoxLayout = new QHBoxLayout();
+        setLayout(qhBoxLayout);
+    }
+
+    GroupHBoxLayout::~GroupHBoxLayout() {
+        delete qhBoxLayout;
+    }
+
+    void GroupHBoxLayout::addWidget(QWidget *widget) {
+        qhBoxLayout->addWidget(widget);
+    }
+}

@@ -1,0 +1,13 @@
+
+#ifndef !PROJECT_NAME_CAPITAL!_FOOINTERNAL_H
+#define !PROJECT_NAME_CAPITAL!_FOOINTERNAL_H
+
+
+class FooInternal {
+public:
+    FooInternal() = default;
+    void print();
+};
+
+
+#endif //!PROJECT_NAME_CAPITAL!_FOOINTERNAL_H

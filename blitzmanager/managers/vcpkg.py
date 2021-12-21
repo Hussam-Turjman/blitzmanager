@@ -114,15 +114,15 @@ class VcpkgManager(PackageManager):
         :return:
         """
         path = Path(self.input_path.path, f"vcpkg-{self.version()}")
-        assert path.exist()
+        assert path.exists()
         vcpkg_bin = Path(path.path, "vcpkg")
         self.__toolchain_path = Path(path.path,
                                      "scripts",
                                      "buildsystems",
                                      "vcpkg.cmake")
         self.vcpkg_path = vcpkg_bin.copy()
-        if vcpkg_bin.exist():
-            logger.info(f"vcpkg is already built and located here : {vcpkg_bin.path}")
+        if vcpkg_bin.exists():
+            logger.info(f"vcpkg is already built and located here : {vcpkg_bin.path}",verbose=10)
             return True
         bootstrap = path.copy()
 
@@ -136,7 +136,7 @@ class VcpkgManager(PackageManager):
 
         Command("-disableMetrics",
                 program=bootstrap.path).execute(cwd=path.path)
-        assert Path(path.path, "vcpkg").exist()
+        assert Path(path.path, "vcpkg").exists()
         return True
 
 

@@ -1,0 +1,8 @@
+!BLITZ_NOTICE!
+
+#include<!PROJECT_NAME!/Foo.h>
+
+int main(){
+    Foo::bar();
+return 0;
+}

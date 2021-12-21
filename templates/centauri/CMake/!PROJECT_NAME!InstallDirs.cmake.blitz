@@ -1,0 +1,25 @@
+# Auto generated file by blitz 2021-03-12-15:40:56. Blitz is a tool for generating cmake 
+# templates, written by (Mohammed Hussam Al Turjman, hussam.turjman@gmail.com). 
+# For more information please visit https://github.com/Hussam-Turjman/LibraryTemplate
+
+include(GNUInstallDirs)
+
+# !PROJECT_NAME_LOWER!_VERSION is only set if we are an LTS release being installed, in which
+# case it may be into a system directory and so we need to make subdirectories
+# for each installed version of !PROJECT_NAME!.  This mechanism is implemented in
+# !PROJECT_NAME!'s internal Copybara (https://github.com/google/copybara) workflows and
+# isn't visible in the CMake buildsystem itself.
+
+if(!PROJECT_NAME_LOWER!_VERSION)
+  set(!PROJECT_NAME_CAPITAL!_SUBDIR "${PROJECT_NAME}_${PROJECT_VERSION}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_BINDIR "${CMAKE_INSTALL_BINDIR}/${!PROJECT_NAME_CAPITAL!_SUBDIR}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${!PROJECT_NAME_CAPITAL!_SUBDIR}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/${!PROJECT_NAME_CAPITAL!_SUBDIR}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${!PROJECT_NAME_CAPITAL!_SUBDIR}")
+else()
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_BINDIR "${CMAKE_INSTALL_BINDIR}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+  set(!PROJECT_NAME_CAPITAL!_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+endif()
+

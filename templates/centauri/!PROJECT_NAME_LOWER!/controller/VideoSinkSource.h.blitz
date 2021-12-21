@@ -1,0 +1,58 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_CONTROLLER_CAMERA_H
+#define CAMERA_CONTROLLER_CAMERA_H
+
+#include <QObject>
+#include <QVideoFrame>
+#include <QVideoSurfaceFormat>
+#include <optional>
+
+#include <memory>
+
+#include <decentrtc/video_cap/CaptureSink.h>
+#include <decentrtc/video_cap/VideoCap.h>
+#include <decentrtc/video_cap/frame/VideoFrame.h>
+
+namespace Controller
+{
+
+    class VideoSinkSource : public QObject, public video_cap::CaptureSinkInterface
+    {
+        Q_OBJECT
+    public:
+        explicit VideoSinkSource(int frameWidth ,
+                                 int frameHeight ,
+                                 int fps = 30,
+                                 QVideoFrame::PixelFormat format = QVideoFrame::PixelFormat::Format_RGB32,
+                                 QObject *parent = nullptr);
+
+        ~VideoSinkSource() override;
+        void onFrame(const video_cap::CaptureFrame &frame) override;
+
+    public:
+    signals:
+        void onFrameSignal(const QVideoFrame &frame);
+        void starting(const QVideoSurfaceFormat &format);
+
+    public slots:
+        bool start();
+        bool stop();
+
+    private:
+        int frameWidth = -1;
+        int frameHeight = -1;
+        int fps = -1;
+        int device_id = -1;
+        QVideoFrame::PixelFormat format = QVideoFrame::PixelFormat::Format_RGB32;
+        QVideoSurfaceFormat surfaceFormat;
+
+        video_cap::VideoCapture capture;
+        video_cap::VideoFrame videoFrame;
+    };
+
+}
+
+#endif //CAMERA_CONTROLLER_CAMERA_H

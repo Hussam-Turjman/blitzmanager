@@ -1,0 +1,13 @@
+
+#ifndef !PROJECT_NAME_CAPITAL!_BOOINTERNAL_H
+#define !PROJECT_NAME_CAPITAL!_BOOINTERNAL_H
+
+
+class BooInternal {
+public:
+    BooInternal() = default;
+    void print();
+};
+
+
+#endif //!PROJECT_NAME_CAPITAL!_BOOINTERNAL_H

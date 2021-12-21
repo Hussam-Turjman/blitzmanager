@@ -1,0 +1,33 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_SERVERWIDGET_H
+#define CAMERA_SERVERWIDGET_H
+
+#include <QGroupBox>
+
+QT_BEGIN_NAMESPACE
+class QFormLayout;
+class QHBoxLayout;
+class QLineEdit;
+QT_END_NAMESPACE
+
+namespace View{
+
+    class ServerWidget : public QGroupBox{
+        Q_OBJECT
+    public:
+        explicit ServerWidget(const QString &title="Server", QWidget *parent = nullptr);
+        ~ServerWidget() override;
+        QString ip() const;
+        QString port() const;
+    private:
+        QFormLayout*qFormLayout;
+        QLineEdit*serverLineEdit;
+        QLineEdit*portLineEdit;
+    };
+}
+
+
+#endif //CAMERA_SERVERWIDGET_H

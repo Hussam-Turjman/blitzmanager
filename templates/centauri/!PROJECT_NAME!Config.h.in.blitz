@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this 
+ * source code is governed by a BSD-style license that can be found in the LICENSE file.
+ */
+
+#ifndef __LIB!PROJECT_NAME_CAPITAL!_CONFIG_H__
+#define __LIB!PROJECT_NAME_CAPITAL!_CONFIG_H__
+
+
+/* Lib!PROJECT_NAME_LOWER! version*/
+#define !PROJECT_NAME_CAPITAL!_VERSION "@!PROJECT_NAME_CAPITAL!_VERSION@"
+#define !PROJECT_NAME_CAPITAL!_VERSION_MAJOR @VERSION_MAJOR@
+#define !PROJECT_NAME_CAPITAL!_VERSION_MINOR @VERSION_MINOR@
+#define !PROJECT_NAME_CAPITAL!_VERSION_PATCH @VERSION_PATCH@
+
+/* Architecture definitions */
+#define IS__x86_64 @IS__x86_64@
+#define IS__x86_64__  @IS__x86_64__@
+#define IS__amd64 @IS__amd64@
+#define IS_M_X64 @IS_M_X64@
+#define IS__i386 @IS__i386@
+#define IS__i386__ @IS__i386__@
+#define IS_M_IX86 @IS_M_IX86@
+#define IS_64BIT  @IS_64BIT@
+#define IS_X86    @IS_X86@
+#define IS_X64    @IS_X64@
+
+
+/* OS definitions */
+#define OS_NAME   "@OS_NAME@"
+#define OS_PLATFORM "@OS_PLATFORM@"
+#define OS_VERSION "@OS_VERSION@"
+#define OS_RELEASE "@OS_RELEASE@"
+
+#define IS_POSIX @IS_POSIX@
+#define IS_WIN @IS_WIN@
+#define IS_APPLE @IS_APPLE@
+#define IS_LINUX @IS_LINUX@
+#define IS_MAC @IS_MAC@
+
+/* Hardware definitions */
+#define PHYSICAL_MEMORY @TOTAL_PHYSICAL_MEMORY@ /* In Megabyte */
+#define VIRTUAL_MEMORY @TOTAL_VIRTUAL_MEMORY@
+#define LOGICAL_CORES @NUMBER_OF_LOGICAL_CORES@
+#define PHYSICAL_CORES @NUMBER_OF_PHYSICAL_CORES@
+#define PROCESSOR_NAME "@PROCESSOR_NAME@"
+#define PROCESSOR_DESCRIPTION "@PROCESSOR_DESCRIPTION@"
+
+
+#if defined(!PROJECT_NAME_CAPITAL!_BUILD_DLL) || defined(!PROJECT_NAME_CAPITAL!_BUILD_SHARED_LIBS)
+#   if defined(_WIN32) || defined (__CYGWIN__)
+#           if defined(EXPORTING_!PROJECT_NAME_CAPITAL!)
+#               define !PROJECT_NAME_CAPITAL!_EXPORT __declspec(dllexport)
+#           else
+#               define !PROJECT_NAME_CAPITAL!_EXPORT __declspec(dllimport)
+#           endif /* EXPORTING_!PROJECT_NAME_CAPITAL! */
+#           define !PROJECT_NAME_CAPITAL!_HIDDEN
+#       else /* Not windows */
+#               define !PROJECT_NAME_CAPITAL!_EXPORT __attribute__ ((visibility ("default")))
+#               define !PROJECT_NAME_CAPITAL!_HIDDEN  __attribute__ ((visibility ("hidden")))
+#   endif /*WIN32*/
+#else /* static build*/
+#   define !PROJECT_NAME_CAPITAL!_EXPORT
+#   define !PROJECT_NAME_CAPITAL!_HIDDEN
+#endif /* DLL */
+
+
+#define !PROJECT_NAME_CAPITAL!_DEBUG_MODE 1
+
+/* Required headers */
+#define HAS_V4L2_CAP @HAS_V4L2_CAP@
+#define HAS_FCNTL @HAS_FCNTL@
+#define HAS_PTHREAD @HAS_PTHREAD@
+#define HAS_POLL @HAS_POLL@
+
+#if HAS_V4L2_CAP
+#define CAP_CARD_BUFFER_SIZE    32
+#define CAP_BUSINFO_BUFFER_SIZE 32
+#define CAP_DRIVER_BUFFER_SIZE  16
+#define CAP_DEV_PATH_STRLEN 30
+#endif 
+
+#ifdef __cplusplus
+#define __!PROJECT_NAME_CAPITAL!_BEGIN_DECLARATION extern "C"{
+#define __!PROJECT_NAME_CAPITAL!_END_DECLARATION   }
+#else
+#define __!PROJECT_NAME_CAPITAL!_BEGIN_DECLARATION
+#define __!PROJECT_NAME_CAPITAL!_END_DECLARATION
+#endif
+
+// A macro to disallow the copy constructor and operator= functions. This should
+// be used in the declarations for a class.
+#define !PROJECT_NAME_CAPITAL!_DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&) = delete;          \
+  !PROJECT_NAME_CAPITAL!_DISALLOW_ASSIGN(TypeName)
+
+// Put this in the declarations for a class to be unassignable.
+#define !PROJECT_NAME_CAPITAL!_DISALLOW_ASSIGN(TypeName) \
+  TypeName& operator=(const TypeName&) = delete;
+
+#endif /* __LIB!PROJECT_NAME_CAPITAL!_CONFIG_H__  */
+

@@ -1,0 +1,82 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#ifndef CAMERA_VIEW_MAINWINDOW_H
+#define CAMERA_VIEW_MAINWINDOW_H
+
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+class QAction;
+
+class QSplitter;
+
+class QVBoxLayout;
+
+class QGroupBox;
+
+QT_END_NAMESPACE
+
+namespace View
+{
+    class ServerWidget;
+    class VideoScene;
+    class GroupHBoxLayout;
+
+    int runMainWindow(int argc, char *argv[]);
+
+    class MainWindow : public QMainWindow
+    {
+        Q_OBJECT
+    public:
+        MainWindow();
+
+        ~MainWindow() override;
+        const VideoScene *getLocalVideoScene();
+        const VideoScene *getRemoteVideoScene();
+
+    protected:
+        void closeEvent(QCloseEvent *event) override;
+
+    public:
+    signals:
+        bool runClicked();
+        bool stopClicked();
+
+    private slots:
+
+        void Run(bool checked = false);
+
+        void Stop(bool checked = false);
+
+    private:
+        void switchButtonsStatus();
+
+        void setGeometry();
+
+        void cleanUp();
+
+        void createFileToolBar();
+
+        void createRunToolBar();
+
+        void connectSignals();
+
+    private:
+        QSplitter *mainSplitter, *upperSplitter;
+        QVBoxLayout *vLayout;
+        QAction *stopAct, *runAct;
+        QGroupBox *groupBox;
+        ServerWidget *serverWidget;
+
+        GroupHBoxLayout *localGroupBox;
+        GroupHBoxLayout *remoteGroupBox;
+        GroupHBoxLayout *peersGroupBpx;
+        VideoScene *localVideoScene;
+        VideoScene *remoteVideoScene;
+    };
+
+}
+
+#endif //CAMERA_VIEW_MAINWINDOW_H

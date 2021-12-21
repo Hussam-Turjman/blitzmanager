@@ -1,0 +1,16 @@
+//
+// Created by hussam on 25.12.20.
+//
+
+#ifndef CAMERA_VIEW_VIDEORENDER_H
+#define CAMERA_VIEW_VIDEORENDER_H
+
+namespace View{
+
+    class VideoRender {
+
+    };
+}
+
+
+#endif //CAMERA_VIEW_VIDEORENDER_H

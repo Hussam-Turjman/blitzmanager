@@ -1,0 +1,36 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/ServerWidget.h"
+#include <QFormLayout>
+#include <QLineEdit>
+
+namespace View{
+    ServerWidget::ServerWidget(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
+        qFormLayout = new QFormLayout();
+        serverLineEdit = new QLineEdit("192.168.0.101");
+        portLineEdit = new QLineEdit("8000");
+        serverLineEdit->setEnabled(false);
+        portLineEdit->setEnabled(false);
+        serverLineEdit->setFixedWidth(180);
+        portLineEdit->setFixedWidth(180);
+        qFormLayout->addRow(tr("IP"),serverLineEdit);
+        qFormLayout->addRow(tr("Port"),portLineEdit);
+        setLayout(qFormLayout);
+    }
+
+    ServerWidget::~ServerWidget() {
+        delete serverLineEdit;
+        delete portLineEdit;
+        delete qFormLayout;
+    }
+
+    QString ServerWidget::ip() const {
+        return serverLineEdit->text();
+    }
+
+    QString ServerWidget::port() const {
+        return portLineEdit->text();
+    }
+}

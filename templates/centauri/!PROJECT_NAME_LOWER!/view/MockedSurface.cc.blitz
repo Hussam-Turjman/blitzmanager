@@ -1,0 +1,42 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/MockedSurface.h"
+
+namespace View{
+    MockedSurface::MockedSurface(QObject *parent) : QAbstractVideoSurface(parent) {
+    }
+
+    QList<QVideoFrame::PixelFormat> MockedSurface::supportedPixelFormats(
+            QAbstractVideoBuffer::HandleType handleType) const {
+        auto ret = realSurface->supportedPixelFormats(handleType);
+        //std::cout << " Supported pixel formats : " << ret.size() << std::endl;
+        return ret;
+    }
+
+
+    bool MockedSurface::start(const QVideoSurfaceFormat &format) {
+        emit onStart(format);
+        bool ret = realSurface->start(format);
+        //std::cout << " Start Format : " << format.pixelFormat() << " Framerate : " << format.frameRate() << std::endl;
+        return ret;
+
+    }
+
+    void MockedSurface::stop() {
+        realSurface->stop();
+        emit onStop();
+    }
+
+    bool MockedSurface::present(const QVideoFrame &frame) {
+        //printf(" Presenting frame : %d  * %d , format %d , %lld %lld \n",frame.width(),frame.height(),frame.pixelFormat(),frame.startTime(),frame.endTime());
+        emit onFrame(frame);
+        return realSurface->present(frame);
+    }
+
+    void MockedSurface::setRealSurface(QAbstractVideoSurface *surface) {
+        realSurface = surface;
+    }
+
+}

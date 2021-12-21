@@ -1,0 +1,11 @@
+!BLITZ_NOTICE!
+
+#include<iostream>
+#include<Foo/Foo.h>
+
+namespace Foo {
+void bar(){
+    std::cout << "PROCESSOR_DESCRIPTION : " << PROCESSOR_DESCRIPTION << std::endl;
+    std::cout << " Bar " << std::endl;
+}
+}

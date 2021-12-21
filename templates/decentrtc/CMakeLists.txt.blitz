@@ -1,0 +1,266 @@
+#
+# Copyright 2017 The Abseil Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Copyright (c) 2021 The !PROJECT_NAME! project Authors. All rights reserved. Use of this 
+# source code is governed by a BSD-style license that can be found in the LICENSE file.
+
+
+# Disable in-source builds to prevent source tree corruption.
+if (" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
+    message(FATAL_ERROR "FATAL: In-source builds are not allowed.
+            You should create a separate directory for build files.")
+endif ()
+
+# Most widely used distributions have cmake 3.5 or greater available as of March
+# 2019.  A notable exception is RHEL-7 (CentOS7).  You can install a current
+# version of CMake by first installing Extra Packages for Enterprise Linux
+# (https://fedoraproject.org/wiki/EPEL#Extra_Packages_for_Enterprise_Linux_.28EPEL.29)
+# and then issuing `yum install cmake3` on the command line.
+cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+
+# Compiler id for Apple Clang is now AppleClang.
+if (POLICY CMP0025)
+    cmake_policy(SET CMP0025 NEW)
+endif (POLICY CMP0025)
+
+# if command can use IN_LIST
+if (POLICY CMP0057)
+    cmake_policy(SET CMP0057 NEW)
+endif (POLICY CMP0057)
+
+# Project version variables are the empty string if version is unspecified
+if (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif (POLICY CMP0048)
+
+# option() honor variables
+if (POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif (POLICY CMP0077)
+
+
+project(!PROJECT_NAME_LOWER! LANGUAGES C CXX)
+
+if (WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+endif ()
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+# Output directory is correct by default for most build setups. However, when
+# building !PROJECT_NAME! as a DLL, it is important to have the DLL in the same
+# directory as the executable using it. Thus, we put all executables in a single
+# /bin directory.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Control where the static and shared libraries are built so that on windows we don't need
+# to tinker with the path to run the executable
+
+if (NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+endif ()
+
+if (NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+endif ()
+
+if (NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/archive)
+endif ()
+
+
+# when !PROJECT_NAME_LOWER! is included as subproject (i.e. using add_subdirectory(!PROJECT_NAME!))
+# in the source tree of a project that uses it, install rules are disabled.
+if (NOT "^${CMAKE_SOURCE_DIR}$" STREQUAL "^${PROJECT_SOURCE_DIR}$")
+    option(!PROJECT_NAME_CAPITAL!_ENABLE_INSTALL "Enable install rule" OFF)
+else ()
+    option(!PROJECT_NAME_CAPITAL!_ENABLE_INSTALL "Enable install rule" ON)
+endif ()
+
+option(BUILD_DLL "Build a single shared library of all !PROJECT_NAME_LOWER! modules. This library has the alias name !PROJECT_NAME_LOWER!::!PROJECT_NAME_LOWER!_dll" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries instead of static" OFF)
+option(!PROJECT_NAME_CAPITAL!_RUN_TESTS "If ON, !PROJECT_NAME! tests will be run." OFF)
+
+
+if (BUILD_SHARED_LIBS)
+    set(!PROJECT_NAME_CAPITAL!_LIBS_TYPE "shared")
+else ()
+    set(!PROJECT_NAME_CAPITAL!_LIBS_TYPE "static")
+endif ()
+
+list(APPEND CMAKE_MODULE_PATH
+        ${CMAKE_CURRENT_LIST_DIR}/CMake
+        ${CMAKE_CURRENT_LIST_DIR}/!PROJECT_NAME_LOWER!/copts
+        )
+
+include(CMakePackageConfigHelpers)
+include(!PROJECT_NAME!InstallDirs)
+include(DecentPackage)
+include(!PROJECT_NAME!Dll)
+include(!PROJECT_NAME!Helpers)
+include(Arch)
+include(Compiler)
+include(Version)
+
+set_this_version(
+        MAJOR 0
+        MINOR 0
+        PATCH 0
+        NUMERIC 0x00000000
+        TYPE dev
+        STAGE alpha)
+
+set(!PROJECT_NAME_CAPITAL!_DEPENDENCIES)
+set(!PROJECT_NAME_CAPITAL!_MODULES)
+set(!PROJECT_NAME_CAPITAL!_IMPORTED_LIBS)
+
+# Add CPack support
+include(InstallRequiredSystemLibraries)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_VERSION_MAJOR "${!PROJECT_NAME_CAPITAL!_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${!PROJECT_NAME_CAPITAL!_VERSION_MINOR}")
+include(CPack)
+
+configure_file(!PROJECT_NAME_LOWER!_config.h.in ${PROJECT_SOURCE_DIR}/!PROJECT_NAME_LOWER!/!PROJECT_NAME_LOWER!_config.h)
+
+
+##
+## Using !PROJECT_NAME_LOWER! targets
+##
+## all public !PROJECT_NAME_LOWER! targets are
+## exported with the !PROJECT_NAME_LOWER!:: prefix
+##
+## e.g !PROJECT_NAME_LOWER!::module_a !PROJECT_NAME_LOWER!::module_b  ....
+##
+## DO NOT rely on the internal targets outside of the prefix
+
+
+# include current path
+list(APPEND !PROJECT_NAME_CAPITAL!_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(!PROJECT_NAME_CAPITAL!_USING_CLANG ON)
+else ()
+    set(!PROJECT_NAME_CAPITAL!_USING_CLANG OFF)
+endif ()
+
+# Find dependencies
+## pthread
+find_package(Threads REQUIRED)
+
+
+
+
+if (${!PROJECT_NAME_CAPITAL!_RUN_TESTS})
+
+    # enable CTest.  This will set BUILD_TESTING to ON unless otherwise specified
+    # on the command line
+    include(CTest)
+
+    enable_testing()
+    find_package(GTest REQUIRED)
+    include_directories(BEFORE PRIVATE ${GTEST_INCLUDE_DIR})
+
+
+    list(APPEND !PROJECT_NAME_CAPITAL!_TEST_COMMON_LIBRARIES
+            GTest::gtest_main
+            GTest::gtest
+            GTest::gmock
+            Threads::Threads
+            )
+endif ()
+
+
+add_subdirectory(!PROJECT_NAME_LOWER!)
+
+if (!PROJECT_NAME_CAPITAL!_ENABLE_INSTALL)
+
+    # install as a subdirectory only
+    install(EXPORT ${PROJECT_NAME}Targets
+            NAMESPACE !PROJECT_NAME_LOWER!::
+            DESTINATION "${!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR}"
+            )
+
+    configure_package_config_file(
+            CMake/!PROJECT_NAME_LOWER!Config.cmake.in
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+            INSTALL_DESTINATION "${!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR}"
+    )
+    install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+            DESTINATION "${!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR}"
+            )
+
+    # !PROJECT_NAME! only has a version in stable releases.
+    if (!PROJECT_NAME_CAPITAL!_STABLE_RELEASE)
+        write_basic_package_version_file(
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+                VERSION "${!PROJECT_NAME_CAPITAL!_VERSION}"
+                COMPATIBILITY ExactVersion
+        )
+
+        install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+                DESTINATION "${!PROJECT_NAME_CAPITAL!_INSTALL_CONFIGDIR}"
+                )
+    endif ()  # !PROJECT_NAME_LOWER!_VERSION
+
+    if (UNIX)
+        install(DIRECTORY !PROJECT_NAME_LOWER!
+                DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR}
+                FILES_MATCHING
+                PATTERN "*.inc"
+                PATTERN "*.h"
+                PATTERN "tests" EXCLUDE
+                PATTERN "third_party" EXCLUDE
+                PATTERN "copts" EXCLUDE
+                PATTERN "testdata" EXCLUDE
+                PATTERN "win" EXCLUDE
+                )
+        elseif(WIN32)
+        install(DIRECTORY !PROJECT_NAME_LOWER!
+                DESTINATION ${!PROJECT_NAME_CAPITAL!_INSTALL_INCLUDEDIR}
+                FILES_MATCHING
+                PATTERN "*.inc"
+                PATTERN "*.h"
+                PATTERN "tests" EXCLUDE
+                PATTERN "third_party" EXCLUDE
+                PATTERN "copts" EXCLUDE
+                PATTERN "testdata" EXCLUDE
+                PATTERN "posix" EXCLUDE
+                )
+        else()
+        message(FATAL_ERROR "Unsupported platform")
+    endif ()
+
+endif ()  # !PROJECT_NAME_CAPITAL!_ENABLE_INSTALL
+
+# Create the uninstall target.
+# https://gitlab.kitware.com/cmake/community/wikis/FAQ#can-i-do-make-uninstall-with-cmake
+if (NOT TARGET uninstall)
+    configure_file(${PROJECT_SOURCE_DIR}/CMake/Uninstall.cmake.in
+            ${PROJECT_BINARY_DIR}/Uninstall.cmake
+            @ONLY)
+
+    add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/Uninstall.cmake)
+endif ()
+
+
+include(PrintInfo)
+print_info()
+

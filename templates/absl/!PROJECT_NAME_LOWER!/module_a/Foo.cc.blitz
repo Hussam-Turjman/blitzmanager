@@ -1,0 +1,13 @@
+
+#include<iostream>
+#include "!PROJECT_NAME_LOWER!/module_b/Boo.h"
+
+#include "!PROJECT_NAME_LOWER!/module_a/Foo.h"
+#include "!PROJECT_NAME_LOWER!/module_a/internal/FooInternal.h"
+
+void foo() {
+    std::cout << " FOO " << std::endl;
+    FooInternal fooInternal;
+    fooInternal.print();
+    boo();
+}

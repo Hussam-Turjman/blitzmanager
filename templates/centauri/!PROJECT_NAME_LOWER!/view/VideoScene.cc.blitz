@@ -1,0 +1,50 @@
+//
+// Created by hussam on 24.12.20.
+//
+
+#include "!PROJECT_NAME_LOWER!/view/VideoScene.h"
+#include "!PROJECT_NAME_LOWER!/view/MockedSurface.h"
+#include <QGraphicsScene>
+#include <QGraphicsVideoItem>
+#include <QGraphicsView>
+#include <QHBoxLayout>
+namespace View{
+    VideoScene::VideoScene(QWidget *parent, Qt::WindowFlags f) : QWidget(parent, f) {
+        graphicsScene = new QGraphicsScene(this);
+        graphicsVideoItem = new QGraphicsVideoItem();
+        graphicsVideoItem->setSize(QSizeF(1280,720));
+        mockedSurface = new MockedSurface();
+        graphicsView = new QGraphicsView(graphicsScene);
+        graphicsScene->addItem(graphicsVideoItem);
+        mockedSurface->setRealSurface(graphicsVideoItem->videoSurface());
+        qhBoxLayout = new QHBoxLayout();
+        qhBoxLayout->addWidget(graphicsView);
+        setLayout(qhBoxLayout);
+    }
+
+
+    bool VideoScene::present(const QVideoFrame &frame) {
+        return mockedSurface->present(frame);
+    }
+
+    bool VideoScene::startSurface(const QVideoSurfaceFormat &format) {
+        bool status = mockedSurface->start(format);
+        printf(" Start Surface status %d  \n",status);
+        return status;
+
+    }
+
+    void VideoScene::stopSurface() {
+        printf(" stopSurface \n");
+        mockedSurface->stop();
+    }
+
+    VideoScene::~VideoScene() {
+
+        delete graphicsVideoItem;
+        delete graphicsScene;
+        delete mockedSurface;
+        delete graphicsView;
+        delete qhBoxLayout;
+    }
+}
