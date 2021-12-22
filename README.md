@@ -7,7 +7,7 @@ be used to create CMake project templates.
 ## Quick Start
 Here is a simple example for installing dependencies using [vcpkg](https://github.com/microsoft/vcpkg).
 
-```{python}
+```python
 from blitzmanager import BlitzManager,Path, SupportedManagers
     
 import os
