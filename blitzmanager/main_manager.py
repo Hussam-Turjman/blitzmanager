@@ -108,8 +108,12 @@ class BlitzManager(object):
 
         :return:
         """
+        print("Available C/C++ package managers : ")
+        print()
         for i, m in enumerate(ManagerInitializer.supported_managers()):
-            logger.info(f"Manager [{i}] : {m}", verbose=0)
+            print(f"Manager [{i}] : {m}")
+        print()
+        print()
         sys.exit(0)
 
     def __call_default_flags(self):
