@@ -1,5 +1,6 @@
 # Copyright (c) 2021-2022 The BlitzManager project Authors. All rights reserved. Use of this
 # source code is governed by a BSD-style license that can be found in the LICENSE file.
+import json
 from typing import List
 
 from .path import Path
@@ -33,6 +34,7 @@ class BlitzManager(object):
         self.list_templates = False
         self.verbose = 5
         self.version = False
+        self.ct = None
         self.version_info = "0.0.0"
         self.clear_flags()
 
@@ -103,6 +105,11 @@ class BlitzManager(object):
                       default=False,
                       action="store_true")
 
+        self.add_flag("--ct", nargs=3,
+                      help="Create CMake project template. Usage :  [template_name] [path to config.json] [output_dir]",
+                      required=False,
+                      default=None)
+
     def __list_mangers(self):
         """
 
@@ -121,6 +128,8 @@ class BlitzManager(object):
 
         :return:
         """
+        set_global_verbose(self.verbose)
+
         if self.list_managers:
             self.__list_mangers()
         if self.list_templates:
@@ -133,7 +142,14 @@ class BlitzManager(object):
             See the LICENSE file for license information.
             """)
             sys.exit(0)
-        set_global_verbose(self.verbose)
+        if self.ct is not None:
+            template_name = self.ct[0]
+            with open(self.ct[1], "r") as f:
+                config = json.load(f)
+                f.close()
+            output_dir = Path(self.ct[2])
+            self.create_template(template_name, config, output_dir)
+            sys.exit(0)
 
     @property
     def arguments_parser(self) -> ArgumentsParser:
@@ -277,7 +293,7 @@ class BlitzManager(object):
 
     def build_dependencies(self):
         """
-        Build all previously add dependencies.
+        Build all previously added dependencies.
         :return:
         """
         for dep in self.__dependencies.keys():
