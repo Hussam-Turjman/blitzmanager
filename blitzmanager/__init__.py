@@ -10,6 +10,7 @@ from .managers import SupportedManagers
 from .main_manager import BlitzManager
 from .template_parser import TemplateGenerator
 from .templates_path_loader import TEMPLATES_PATH
+from .command import Command
 from .scraping import DirectoryParserCallback, \
     DirectoryHarvester, \
     AbsolutePathsCollector, \
@@ -29,6 +30,7 @@ from .scraping import DirectoryParserCallback, \
     RegexReplacerCallback
 
 __all__ = ["logger",
+           "Command",
            "TemplateGenerator",
            "CMakeBuilder",
            "CMakeArguments",

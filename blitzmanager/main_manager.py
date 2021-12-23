@@ -38,6 +38,14 @@ class BlitzManager(object):
         self.version_info = "0.0.0"
         self.clear_flags()
 
+    @property
+    def dependencies(self):
+        return self.__dependencies
+
+    @property
+    def manager_install_path(self):
+        return self.__package_manager.install_path()
+
     def __exit_handler(self):
         """
 

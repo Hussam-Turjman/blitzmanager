@@ -94,6 +94,13 @@ class PackageManager(abc.ABC):
         """
 
     @abc.abstractmethod
+    def install_path(self) -> Path:
+        """
+
+        :return:
+        """
+
+    @abc.abstractmethod
     def initialize(self) -> bool:
         """
 

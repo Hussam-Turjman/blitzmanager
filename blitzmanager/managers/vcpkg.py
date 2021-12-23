@@ -43,7 +43,7 @@ class VcpkgManager(PackageManager):
         # x86-windows
         self.vcpkg_path = Path("")
         self.__toolchain_path = Path("")
-
+        self.__install_path = Path("")
         if PLATFORM.is_windows():
             self.target = "x64-windows-static"
         elif PLATFORM.is_linux():
@@ -108,6 +108,13 @@ class VcpkgManager(PackageManager):
         """
         return self.__output_path
 
+    def install_path(self) -> Path:
+        """
+
+        :return:
+        """
+        return self.__install_path
+
     def initialize(self) -> bool:
         """
 
@@ -116,13 +123,14 @@ class VcpkgManager(PackageManager):
         path = Path(self.input_path.path, f"vcpkg-{self.version()}")
         assert path.exists()
         vcpkg_bin = Path(path.path, "vcpkg")
+        self.__install_path = Path(path.path, "installed", self.target)
         self.__toolchain_path = Path(path.path,
                                      "scripts",
                                      "buildsystems",
                                      "vcpkg.cmake")
         self.vcpkg_path = vcpkg_bin.copy()
         if vcpkg_bin.exists():
-            logger.info(f"vcpkg is already built and located here : {vcpkg_bin.path}",verbose=10)
+            logger.info(f"vcpkg is already built and located here : {vcpkg_bin.path}", verbose=10)
             return True
         bootstrap = path.copy()
 
