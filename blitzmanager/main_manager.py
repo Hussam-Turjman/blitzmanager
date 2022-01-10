@@ -24,7 +24,7 @@ class BlitzManager(object):
 
     def __init__(self):
         atexit.register(self.__exit_handler)
-        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for manging C/C++ dependencies.")
+        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for managing C/C++ dependencies.")
         self.__flags = {}
         self.__manager_initializer = None
         self.__package_manager = None
