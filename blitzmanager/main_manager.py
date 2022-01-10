@@ -15,6 +15,8 @@ from .templates_path_loader import TEMPLATES_PATH
 import atexit
 import sys
 
+TOOL_DESCRIPTION = """BlitzManager is a tool for managing C/C++ dependencies."""
+
 
 class BlitzManager(object):
     __arguments_parser: ArgumentsParser
@@ -24,7 +26,7 @@ class BlitzManager(object):
 
     def __init__(self):
         atexit.register(self.__exit_handler)
-        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for managing C/C++ dependencies.")
+        self.__arguments_parser = ArgumentsParser(description=TOOL_DESCRIPTION)
         self.__flags = {}
         self.__manager_initializer = None
         self.__package_manager = None
@@ -255,7 +257,7 @@ class BlitzManager(object):
         self.__flags.clear()
         for flag in self.__arguments_parser.flags:
             delattr(self, flag)
-        self.__arguments_parser = ArgumentsParser(description="BlitzManager is a tool for manging C/C++ dependencies.")
+        self.__arguments_parser = ArgumentsParser(description=TOOL_DESCRIPTION)
         self.__arguments_parser.flags.clear()
         self.__add_default_flags()
         return self
