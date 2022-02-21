@@ -17,6 +17,12 @@ class Path(object):
 
         self.__path = os.path.join(path, *paths)
 
+    def chmod(self, mode):
+        return os.chmod(self.__path, mode)
+
+    def state(self):
+        return os.stat(self.__path)
+    
     def is_file(self):
         return os.path.isfile(self.__path)
 
