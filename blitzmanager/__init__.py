@@ -1,4 +1,4 @@
-from .path import Path
+from .path import Path,copy_folder_with_permissions
 import os
 
 from .logger import logger
@@ -57,5 +57,6 @@ __all__ = ["logger",
            "Harvester",
            "HeadersReplacerCallback",
            "RegexReplacer",
-           "RegexReplacerCallback"
+           "RegexReplacerCallback",
+           "copy_folder_with_permissions"
            ]

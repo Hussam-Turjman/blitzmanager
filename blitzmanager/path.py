@@ -22,7 +22,7 @@ class Path(object):
 
     def state(self):
         return os.stat(self.__path)
-    
+
     def is_file(self):
         return os.path.isfile(self.__path)
 
@@ -251,4 +251,29 @@ class Path(object):
         return self.path
 
 
-__all__ = ["Path"]
+def copy_folder_with_permissions(root_dir: Path, source_dir: Path, target_dir: Path):
+    lib_folder_content = {}
+
+    def walk_callback(root, subdirs, files):
+        for file in files:
+            file_path = Path(root, file)
+            relative_path = file_path.relative_path(root_dir.path)
+
+            with open(file_path.path, "rb") as f:
+                lib_folder_content[relative_path] = (file_path.state().st_mode, f.read())
+                f.close()
+
+    source_dir.walk(walk_callback, recursive=True)
+
+    for file in lib_folder_content.keys():
+        file_path = target_dir.copy().join(file)
+        Path(file_path.dirname()).make(override=False, ignore_errors=True, directory=True)
+
+        with open(file_path.path, "wb+") as f:
+            st_mode, file_content = lib_folder_content[file]
+            f.write(file_content)
+            f.close()
+        file_path.chmod(st_mode)
+
+
+__all__ = ["Path", "copy_folder_with_permissions"]
