@@ -27,7 +27,7 @@ class VcpkgManager(PackageManager):
 
     @staticmethod
     def url() -> str:
-        return "https://github.com/microsoft/vcpkg/archive/refs/tags/2021.05.12.zip"
+        return "https://github.com/microsoft/vcpkg/archive/refs/tags/2023.08.09.zip"
 
     @staticmethod
     def version() -> str:
