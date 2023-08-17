@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="blitzmanager",
-    version="0.0.5",
+    version="0.0.7",
     author="Hussam Turjman",
     author_email="hussam.turjman@gmail.com",
     description="Simple high level manager that uses package managers for C/C++ dependencies.",

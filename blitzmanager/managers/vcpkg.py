@@ -27,11 +27,11 @@ class VcpkgManager(PackageManager):
 
     @staticmethod
     def url() -> str:
-        return "https://github.com/microsoft/vcpkg/archive/refs/tags/2023.08.09.zip"
+        return f"https://github.com/microsoft/vcpkg/archive/refs/tags/{VcpkgManager.version()}.zip"
 
     @staticmethod
     def version() -> str:
-        return "2021.05.12"
+        return "2023.08.09"
 
     def __init__(self, input_path: Path):
         assert input_path.is_dir()
