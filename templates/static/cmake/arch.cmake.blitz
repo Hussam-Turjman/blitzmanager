@@ -59,6 +59,10 @@ if (APPLE)
     set(IS_APPLE 1)
 endif()
 
+if (UNIX AND NOT APPLE)
+    set(IS_LINUX 1)
+endif()
+
 # Check for 64-bit x86 (aka x64):
 check_symbol_exists(__x86_64   "stddef.h" IS__x86_64)
 
